@@ -24,7 +24,7 @@ for zone in zone_filenames.values():
     compiled_data['hr'] = compiled_data.index.hour
     compiled_data['dofw'] = compiled_data.index.dayofweek
 
-    max_indices = compiled_data.resample('1h')['Load'].idxmax()
+    max_indices = compiled_data.resample('1d')['Load'].idxmax()
     compiled_data = compiled_data.loc[max_indices]
 
     compiled_data.dropna(inplace=True, axis='rows')
