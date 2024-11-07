@@ -28,6 +28,8 @@ def plot_heatmap(dist, vlo, vhi, hlo, hhi, resolution=1000):
     plt.colorbar(label='Predicted probability density')
 
 
+target_col = 'residual'
+
 for filename in filenames:
     train = pd.read_csv(f'small_datasets/compiled_datasets/train-{filename}.csv', index_col=0)
     test = pd.read_csv(f'small_datasets/compiled_datasets/test-{filename}.csv', index_col=0)
@@ -35,15 +37,15 @@ for filename in filenames:
     train.index = pd.to_datetime(train.index, utc=True)
     test.index = pd.to_datetime(test.index, utc=True)
 
-    train_feature = train.drop(columns='value')
-    test_feature = test.drop(columns='value')
+    train_feature = train.drop(columns=target_col)
+    test_feature = test.drop(columns=target_col)
 
-    train_target = train['value']
-    test_target = test['value']
+    train_target = train[target_col]
+    test_target = test[target_col]
 
     print(f'Fitting {filename}')
 
-    model = ExtremeTree(max_split=20, min_samples=20)
+    model = ExtremeTree(max_split=20, min_samples=10)
     model.fit(train_feature, train_target, feature_names=train_feature.columns)
     predict = model.predict(test_feature)
 
@@ -58,7 +60,7 @@ for filename in filenames:
     plot_heatmap(predict, hlo=test_target.index.min(), hhi=test_target.index.max(),
                  vlo=min(test_target.min(), predict.ppf(0.1).min()),
                  vhi=max(test_target.max(), predict.ppf(0.9).max()))
-    plt.scatter(test.index, test_target, label='Actual hourly maxima', color='white', s=10)
+    plt.scatter(test_target.index, test_target, label='Actual hourly maxima', color='white', s=10)
 
     plt.grid(color='white', alpha=0.4)
     plt.xlabel(r'UTC Time')

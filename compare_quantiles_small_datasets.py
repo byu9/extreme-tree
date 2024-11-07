@@ -29,6 +29,8 @@ def pinball_loss(df_predict, df_target):
 
 results = pd.DataFrame(index=filenames)
 
+target_col = 'residual'
+
 for filename in filenames:
     test = pd.read_csv(f'small_datasets/compiled_datasets/test-{filename}.csv', index_col='local')
     qr_predict = pd.read_csv(f'qr_small_datasets/{filename}.csv', index_col='local')
@@ -38,7 +40,7 @@ for filename in filenames:
     qr_predict.index = pd.to_datetime(qr_predict.index, utc=True)
     gev_predict.index = pd.to_datetime(gev_predict.index, utc=True)
 
-    target = pd.DataFrame({label: test['value'] for label in quantiles.keys()})
+    target = pd.DataFrame({label: test[target_col] for label in quantiles.keys()})
 
     results.loc[filename, 'qr'] = pinball_loss(qr_predict, target)
     results.loc[filename, 'extreme_tree'] = pinball_loss(gev_predict, target)

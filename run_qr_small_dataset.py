@@ -16,15 +16,17 @@ quantiles = {
     'q=0.9': 0.9,
 }
 
+target_col = 'residual'
+
 for filename in filenames:
     train = pd.read_csv(f'small_datasets/compiled_datasets/train-{filename}.csv', index_col=0)
     test = pd.read_csv(f'small_datasets/compiled_datasets/test-{filename}.csv', index_col=0)
 
-    train_feature = train.drop(columns='value')
-    test_feature = test.drop(columns='value')
+    train_feature = train.drop(columns=target_col)
+    test_feature = test.drop(columns=target_col)
 
-    train_target = train['value']
-    test_target = test['value']
+    train_target = train[target_col]
+    test_target = test[target_col]
 
     predictions = pd.DataFrame(index=test.index)
 

@@ -30,6 +30,8 @@ quantiles = {
     'q=0.9': 0.9,
 }
 
+target_col = 'residual'
+
 
 # Visualize fitment
 def plot_heatmap(dist, vlo, vhi, hlo, hhi, resolution=1000):
@@ -46,11 +48,11 @@ for zone in zones:
     train.index = pd.to_datetime(train.index, utc=True)
     test.index = pd.to_datetime(test.index, utc=True)
 
-    train_feature = train.drop(columns='Load')
-    test_feature = test.drop(columns='Load')
+    train_feature = train.drop(columns=target_col)
+    test_feature = test.drop(columns=target_col)
 
-    train_target = train['Load']
-    test_target = test['Load']
+    train_target = train[target_col]
+    test_target = test[target_col]
 
     print(f'Fitting {zone}')
 

@@ -38,6 +38,8 @@ def pinball_loss(df_predict, df_target):
     return loss.mean(axis=None)
 
 
+target_col = 'residual'
+
 results = pd.DataFrame(index=zones)
 
 for zone in zones:
@@ -49,7 +51,7 @@ for zone in zones:
     qr_predict.index = pd.to_datetime(qr_predict.index, utc=True)
     gev_predict.index = pd.to_datetime(gev_predict.index, utc=True)
 
-    target = pd.DataFrame({label: test['Load'] for label in quantiles.keys()})
+    target = pd.DataFrame({label: test[target_col] for label in quantiles.keys()})
 
     results.loc[zone, 'qr'] = pinball_loss(qr_predict, target)
     results.loc[zone, 'extreme_tree'] = pinball_loss(gev_predict, target)

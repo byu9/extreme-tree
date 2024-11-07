@@ -27,15 +27,17 @@ quantiles = {
     'q=0.9': 0.9,
 }
 
+target_col = 'residual'
+
 for zone in zones:
     train = pd.read_csv(f'nyiso/compiled_datasets/train-{zone}.csv', index_col=0)
     test = pd.read_csv(f'nyiso/compiled_datasets/test-{zone}.csv', index_col=0)
 
-    train_feature = train.drop(columns='Load')
-    test_feature = test.drop(columns='Load')
+    train_feature = train.drop(columns=target_col)
+    test_feature = test.drop(columns=target_col)
 
-    train_target = train['Load']
-    test_target = test['Load']
+    train_target = train[target_col]
+    test_target = test[target_col]
 
     predictions = pd.DataFrame(index=test.index)
 
