@@ -183,7 +183,7 @@ def _compile_dataset_for_da(dataset):
 def _compile_datasets():
     year_month_list = [
         (year, month)
-        for year in [2022, 2023, 2024]
+        for year in range(2018, 2025)
         for month in range(1, 13)
     ]
 
