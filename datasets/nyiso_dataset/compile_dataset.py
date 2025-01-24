@@ -153,10 +153,7 @@ def _compile_dataset_for_da(dataset):
         _dataset['DoW'] = _dataset.index.dayofweek
         _dataset['Prior1'] = _dataset['Target'].shift(1)
         _dataset['Prior2'] = _dataset['Target'].shift(2)
-        _dataset['Prior3'] = _dataset['Target'].shift(3)
-        _dataset['Prior6'] = _dataset['Target'].shift(6)
         _dataset['Prior7'] = _dataset['Target'].shift(7)
-        _dataset['Prior8'] = _dataset['Target'].shift(8)
 
     # Split dataset by zones
     for zone in dataset.columns.get_level_values(0):
