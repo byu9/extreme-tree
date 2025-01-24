@@ -1,0 +1,13 @@
+Label,Prediction,Target
+nyiso-CAPITL,results/et/test-nyiso-CAPITL.csv,datasets/test/target-nyiso-CAPITL.csv
+nyiso-CENTRL,results/et/test-nyiso-CENTRL.csv,datasets/test/target-nyiso-CENTRL.csv
+nyiso-DUNWOD,results/et/test-nyiso-DUNWOD.csv,datasets/test/target-nyiso-DUNWOD.csv
+nyiso-GENESE,results/et/test-nyiso-GENESE.csv,datasets/test/target-nyiso-GENESE.csv
+nyiso-HUD_VL,results/et/test-nyiso-HUD_VL.csv,datasets/test/target-nyiso-HUD_VL.csv
+nyiso-LONGIL,results/et/test-nyiso-LONGIL.csv,datasets/test/target-nyiso-LONGIL.csv
+nyiso-MHK_VL,results/et/test-nyiso-MHK_VL.csv,datasets/test/target-nyiso-MHK_VL.csv
+nyiso-MILLWD,results/et/test-nyiso-MILLWD.csv,datasets/test/target-nyiso-MILLWD.csv
+nyiso-NORTH,results/et/test-nyiso-NORTH.csv,datasets/test/target-nyiso-NORTH.csv
+nyiso-NYC,results/et/test-nyiso-NYC.csv,datasets/test/target-nyiso-NYC.csv
+nyiso-WEST,results/et/test-nyiso-WEST.csv,datasets/test/target-nyiso-WEST.csv
+synthetic,results/et/test-synthetic.csv,datasets/test/target-synthetic.csv

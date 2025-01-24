@@ -42,7 +42,7 @@ class _TreeNode(BinaryTreeNode):
 
 
 class ExtremeTree:
-    def __init__(self, dist='GenExtreme', max_split=10, min_samples=10, min_score_drop=0):
+    def __init__(self, dist='GenExtreme', max_split=30, min_samples=3, min_score_drop=0):
         self._min_samples = min_samples
         self._max_split = max_split
         self._min_score_drop = float(min_score_drop)
@@ -192,8 +192,9 @@ class ExtremeTree:
                 right_child = self._tree.right_child_of(node)
 
                 node_label = f'NonLeaf-{index}'
-                left_label = f'{self._feature_names[node.feature_id]} ≤ {node.threshold}'
-                right_label = f'{self._feature_names[node.feature_id]} > {node.threshold}'
+                threshold = np.array([node.threshold])
+                left_label = f'{self._feature_names[node.feature_id]} ≤ {threshold}'
+                right_label = f'{self._feature_names[node.feature_id]} > {threshold}'
 
                 graph.add_node(id(node), label=node_label)
                 graph.add_edge(id(node), id(left_child), label=left_label)
