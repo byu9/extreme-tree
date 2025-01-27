@@ -5,15 +5,24 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+quantiles = np.linspace(0.1, 0.9, 9).reshape(1, -1)
+
 
 def _pinball_loss(prediction, target):
-    quantiles = np.linspace(0.1, 0.9, 9).reshape(1, -1)
-
     scores = np.full_like(prediction, fill_value=np.nan)
     np.multiply(target - prediction, quantiles, where=target >= prediction, out=scores)
     np.multiply(prediction - target, 1 - quantiles, where=target < prediction, out=scores)
 
     scores = scores.mean(axis=0)
+    return scores
+
+
+def _crps_loss(prediction, target):
+    scores = np.full_like(prediction, fill_value=np.nan)
+    np.square(quantiles, where=target >= prediction, out=scores)
+    np.square(1 - quantiles, where=target < prediction, out=scores)
+
+    scores = scores.sum(axis=-1).mean(axis=0)
     return scores
 
 
@@ -57,7 +66,7 @@ def _run_main():
     for label, paths in pairs.items():
         prediction = _load_prediction(paths['Prediction']).to_numpy()
         target = _load_target(paths['Target']).to_numpy()
-        score_dict[label] = _pinball_loss(prediction, target)
+        score_dict[label] = _crps_loss(prediction, target)
 
     scoreboard = pd.DataFrame.from_dict(score_dict, orient='index')
     scoreboard.loc['(mean)'] = scoreboard.mean(axis='index')
