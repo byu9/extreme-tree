@@ -27,10 +27,10 @@ def _compile_dataset():
     x_at_max = np.take_along_axis(x_blocks, max_indices, axis=-1).ravel()
     z_at_max = np.take_along_axis(z_blocks, max_indices, axis=-1).ravel()
 
-    all_z = pd.DataFrame({'x': x, 'Target': z}, index=range(n_samples))
+    all_z = pd.DataFrame({'x': x, 'Target': z}, index=x)
     all_z.to_csv('all_z.csv', index_label='Index')
 
-    dataset = pd.DataFrame({'x': x_at_max, 'Target': z_at_max}, index=range(n_blocks))
+    dataset = pd.DataFrame({'x': x_at_max, 'Target': z_at_max}, index=x_at_max)
     dataset.to_csv('max_z.csv', index_label='Index')
 
     _save_feature(dataset, '../train/feature-synthetic.csv')
