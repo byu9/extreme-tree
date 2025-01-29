@@ -45,9 +45,12 @@ class GenExtreme:
 
 
 def _log_score(mu, sigma, xi, y):
-    score = -genextreme.logpdf(y, loc=mu, scale=sigma, c=-xi)
-    score = np.nan_to_num(score, nan=0, posinf=0, neginf=0, copy=False)
-    return score
+    logpdf = genextreme.logpdf(y, loc=mu, scale=sigma, c=-xi)
+
+    logpdf_outside_support = -1000
+    np.nan_to_num(logpdf, nan=logpdf_outside_support, neginf=logpdf_outside_support, copy=False)
+
+    return -logpdf
 
 
 def _pwm_estimate(target):
