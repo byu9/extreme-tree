@@ -161,13 +161,6 @@ class ExtremeTree:
 
         feature = feature.transpose()
         target = target.transpose()
-
-        if feature_names is not None:
-            self._feature_names = feature_names
-
-        else:
-            self._feature_names = [f'Feature {n}' for n in range(len(feature))]
-
         self._build_tree(feature, target)
 
     def predict(self, feature):
@@ -179,36 +172,6 @@ class ExtremeTree:
         feature = feature.transpose()
         predict = self._forward_prop(feature)
         return predict
-
-    def plot_tree(self, filename):
-        self._ensure_fitted()
-
-        from pygraphviz import AGraph
-        graph = AGraph(directed=True)
-
-        with (np.printoptions(precision=3)):
-            for index, node in enumerate(self._tree.non_leaves):
-                left_child = self._tree.left_child_of(node)
-                right_child = self._tree.right_child_of(node)
-
-                node_label = f'NonLeaf-{index}'
-                threshold = np.array([node.threshold])
-                left_label = f'{self._feature_names[node.feature_id]} ≤ {threshold}'
-                right_label = f'{self._feature_names[node.feature_id]} > {threshold}'
-
-                graph.add_node(id(node), label=node_label)
-                graph.add_edge(id(node), id(left_child), label=left_label)
-                graph.add_edge(id(node), id(right_child), label=right_label)
-
-            for index, node in enumerate(self._tree.leaves):
-                node_label = f'Leaf-{index}\n{self._dist.display_label(node.params)}'
-                graph.add_node(id(node), label=node_label)
-
-        graph.node_attr['shape'] = 'box'
-        graph.node_attr['style'] = 'rounded'
-        graph.node_attr['fontname'] = 'monospace'
-        graph.edge_attr['fontname'] = 'monospace'
-        graph.draw(filename, prog='dot')
 
     def _ensure_fitted(self):
         if self._tree is None:

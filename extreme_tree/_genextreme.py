@@ -18,14 +18,6 @@ class _DistParams:
 
 class GenExtreme:
     @staticmethod
-    def display_label(params: _DistParams):
-        return (
-            f'μ={params.mu}\n'
-            f'σ={params.sigma}\n'
-            f'ξ={params.xi}'
-        )
-
-    @staticmethod
     def compute_estimate(target):
         params = _DistParams()
         params.mu, params.sigma, params.xi = _pwm_estimate(target)
