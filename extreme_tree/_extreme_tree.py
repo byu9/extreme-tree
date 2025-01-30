@@ -152,7 +152,7 @@ class ExtremeTree:
             self._tree.add_node(left_child, parent=best_leaf, is_left=True)
             self._tree.add_node(right_child, parent=best_leaf, is_left=False)
 
-    def _forward_prop(self, feature):
+    def _forward_prop(self, feature, return_dist: bool):
         self._tree.root.pi = 1.0
 
         for node in self._tree.topological_ordering():
@@ -164,7 +164,7 @@ class ExtremeTree:
                 left_child.pi = node.pi * (feature_val <= node.threshold)
                 right_child.pi = node.pi * (feature_val > node.threshold)
 
-        prediction = self._dist.forward_prop(self._tree.leaves)
+        prediction = self._dist.forward_prop(self._tree.leaves, return_dist=return_dist)
         return prediction
 
     def fit(self, feature, target):
@@ -173,9 +173,9 @@ class ExtremeTree:
         target = target.transpose()
         self._build_tree(feature, target)
 
-    def predict(self, feature):
+    def predict(self, feature, return_dist: bool = True):
         self._ensure_fitted()
         feature = validate_feature(feature)
         feature = feature.transpose()
-        predict = self._forward_prop(feature)
+        predict = self._forward_prop(feature, return_dist=return_dist)
         return predict
