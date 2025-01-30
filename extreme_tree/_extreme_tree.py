@@ -4,9 +4,9 @@ from operator import attrgetter
 import numpy as np
 from tqdm.auto import tqdm
 
-from .binary_trees import BinaryTree
-from .binary_trees import BinaryTreeNode
-from .genextreme import GenExtreme
+from ._binary_trees import BinaryTree
+from ._binary_trees import BinaryTreeNode
+from ._genextreme import GenExtreme
 
 _supported_dists = {
     'GenExtreme': GenExtreme,
