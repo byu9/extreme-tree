@@ -7,6 +7,8 @@ from tqdm.auto import tqdm
 from ._binary_trees import BinaryTree
 from ._binary_trees import BinaryTreeNode
 from ._genextreme import GenExtreme
+from ._misc import validate_feature
+from ._misc import validate_feature_target
 
 _supported_dists = {
     'GenExtreme': GenExtreme,
@@ -79,7 +81,7 @@ class ExtremeTree:
         for feature_id in feature_ids:
             sort_indices = node.feature[feature_id].argsort()
             feature = node.feature[:, sort_indices]
-            target = node.target[sort_indices]
+            target = node.target[:, sort_indices]
 
             unique_values = np.unique(feature[feature_id])
             midpoints = (unique_values[:-1] + unique_values[1:]) / 2
@@ -89,12 +91,12 @@ class ExtremeTree:
             for threshold in thresholds:
                 split_index = np.searchsorted(feature[feature_id], threshold, side='right')
 
-                if self._min_samples <= split_index <= n_samples - self._min_samples:
+                if self._min_part_size <= split_index <= n_samples - self._min_part_size:
                     left_feature = feature[:, :split_index]
                     right_feature = feature[:, split_index:]
 
-                    left_target = target[:split_index]
-                    right_target = target[split_index:]
+                    left_target = target[:, :split_index]
+                    right_target = target[:, split_index:]
 
                     left_params = self._dist.compute_estimate(left_target)
                     right_params = self._dist.compute_estimate(right_target)
@@ -126,7 +128,7 @@ class ExtremeTree:
         self._evolve_node(root_node)
         self._tree.add_node(root_node)
 
-        splits = tqdm(range(self._max_split), leave=False)
+        splits = tqdm(range(self._max_n_splits), leave=False)
         splits.set_description('Split')
 
         for _ in splits:
@@ -165,26 +167,15 @@ class ExtremeTree:
         prediction = self._dist.forward_prop(self._tree.leaves)
         return prediction
 
-    def fit(self, feature, target, feature_names=None):
-        feature = np.asarray(feature)
-        target = np.asarray(target).reshape(-1)
-
-        if not feature.ndim == 2:
-            raise ValueError('Feature must be 2D having (n_samples, n_features).')
-
-        if len(feature) != len(target):
-            raise ValueError('Feature and target contains different number of samples.')
-
+    def fit(self, feature, target):
+        feature, target = validate_feature_target(feature, target)
         feature = feature.transpose()
         target = target.transpose()
         self._build_tree(feature, target)
 
     def predict(self, feature):
         self._ensure_fitted()
-        feature = np.asarray(feature)
-        if not feature.ndim == 2:
-            raise ValueError('Feature must be 2D having (n_samples, n_features).')
-
+        feature = validate_feature(feature)
         feature = feature.transpose()
         predict = self._forward_prop(feature)
         return predict

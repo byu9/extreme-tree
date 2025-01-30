@@ -31,9 +31,10 @@ class GenExtreme:
 
     @staticmethod
     def forward_prop(leaves):
-        mu_hat = sum(leaf.pi * leaf.params.mu for leaf in leaves)
-        sigma_hat = sum(leaf.pi * leaf.params.sigma for leaf in leaves)
-        xi_hat = sum(leaf.pi * leaf.params.xi for leaf in leaves)
+        mu_hat = sum(leaf.pi * leaf.params.mu for leaf in leaves).transpose()
+        sigma_hat = sum(leaf.pi * leaf.params.sigma for leaf in leaves).transpose()
+        xi_hat = sum(leaf.pi * leaf.params.xi for leaf in leaves).transpose()
+
         prediction = genextreme(loc=mu_hat, scale=sigma_hat, c=-xi_hat)
         return prediction
 
@@ -50,12 +51,12 @@ def _log_score(mu, sigma, xi, y):
 def _pwm_estimate(target):
     # Probability weighted moment estimate
     # See https://doi.org/10.1080/00401706.1985.10488049
-    x = np.sort(target)
-    n = len(target)
+    x = np.sort(target, axis=-1)
+    n = target.shape[-1]
     j = np.arange(1, n + 1)
 
     if n <= 2:
-        raise ValueError('Increase minimum partition size to at least 2')
+        raise ValueError('Increase minimum partition size to at least 3.')
 
     num0 = x
     num1 = num0 * (j - 1)
