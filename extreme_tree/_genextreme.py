@@ -5,7 +5,7 @@ from scipy.special import gamma
 from scipy.stats import genextreme
 
 
-@dataclass(init=False)
+@dataclass(init=False, slots=True)
 class _DistParams:
     # Distribution parameters
     # Location - mu
@@ -17,6 +17,8 @@ class _DistParams:
 
 
 class GenExtreme:
+    __slots__ = ()
+
     @staticmethod
     def compute_estimate(target):
         params = _DistParams()

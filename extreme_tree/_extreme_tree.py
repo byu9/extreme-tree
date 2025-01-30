@@ -13,7 +13,7 @@ _supported_dists = {
 }
 
 
-@dataclass(init=False, eq=False)
+@dataclass(init=False, eq=False, slots=True)
 class _TreeNode(BinaryTreeNode):
     # Assigned training partition
     feature: ...
@@ -42,13 +42,29 @@ class _TreeNode(BinaryTreeNode):
 
 
 class ExtremeTree:
-    def __init__(self, dist='GenExtreme', max_split=30, min_samples=3, min_score_drop=0):
-        self._min_samples = min_samples
-        self._max_split = max_split
-        self._min_score_drop = float(min_score_drop)
-        self._feature_names = None
-        self._tree = None
+    __slots__ = (
+        '_min_part_size',
+        '_min_score_drop',
+        '_max_n_splits',
+        '_dist',
+        '_tree',
+    )
+
+    def __init__(self,
+                 dist='GenExtreme',
+                 max_n_splits: int = 10,
+                 min_part_size: int = 10,
+                 min_score_drop: float = 0.0):
+
+        self._min_part_size = min_part_size
+        self._min_score_drop = min_score_drop
+        self._max_n_splits = max_n_splits
         self._dist = _supported_dists[dist]()
+        self._tree = None
+
+    def _ensure_fitted(self):
+        if self._tree is None:
+            raise RuntimeError('Model is not fitted.')
 
     def _evolve_node(self, node: _TreeNode):
         node.params = self._dist.compute_estimate(node.target)
@@ -172,7 +188,3 @@ class ExtremeTree:
         feature = feature.transpose()
         predict = self._forward_prop(feature)
         return predict
-
-    def _ensure_fitted(self):
-        if self._tree is None:
-            raise RuntimeError('Model is not fitted.')
