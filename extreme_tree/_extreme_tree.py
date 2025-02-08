@@ -173,7 +173,7 @@ class ExtremeTree:
         target = target.transpose()
         self._build_tree(feature, target)
 
-    def predict(self, feature, return_dist: bool = True):
+    def predict(self, feature, return_dist: bool = False):
         self._ensure_fitted()
         feature = validate_feature(feature)
         feature = feature.transpose()
