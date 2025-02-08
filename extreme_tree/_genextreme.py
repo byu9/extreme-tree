@@ -31,9 +31,9 @@ class GenExtreme:
 
     @staticmethod
     def forward_prop(leaves, return_dist: bool):
-        mu_hat = sum(leaf.pi * leaf.params.mu for leaf in leaves).transpose()
-        sigma_hat = sum(leaf.pi * leaf.params.sigma for leaf in leaves).transpose()
-        xi_hat = sum(leaf.pi * leaf.params.xi for leaf in leaves).transpose()
+        mu_hat = np.transpose(sum(leaf.pi * leaf.params.mu for leaf in leaves))
+        sigma_hat = np.transpose(sum(leaf.pi * leaf.params.sigma for leaf in leaves))
+        xi_hat = np.transpose(sum(leaf.pi * leaf.params.xi for leaf in leaves))
 
         if return_dist:
             prediction = genextreme(loc=mu_hat, scale=sigma_hat, c=-xi_hat)
