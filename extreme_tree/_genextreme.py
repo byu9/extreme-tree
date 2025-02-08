@@ -39,7 +39,7 @@ class GenExtreme:
             prediction = genextreme(loc=mu_hat, scale=sigma_hat, c=-xi_hat)
 
         else:
-            prediction = np.concat([mu_hat, sigma_hat, xi_hat], axis=-1)
+            prediction = np.stack([mu_hat, sigma_hat, xi_hat], axis=0)
 
         return prediction
 
