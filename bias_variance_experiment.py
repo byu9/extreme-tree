@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+import os
 from itertools import product
 from multiprocessing import Pool
 
@@ -6,6 +8,7 @@ from scipy.stats import norm
 
 from extreme_tree import ExtremeForest
 
+os.environ["TQDM_DISABLE"] = "True"
 np.random.seed(123)
 
 
@@ -21,64 +24,60 @@ def _fit_predict_once(ensemble_size, resample_ratio, max_n_splits):
     model = ExtremeForest(ensemble_size=ensemble_size, resample_ratio=resample_ratio,
                           max_n_splits=max_n_splits)
     model.fit(x, y)
-    return model.predict(x)
+    mu, sigma, xi = model.predict(x)
+
+    print_items = ','.join([
+        f'{ensemble_size=:}',
+        f'{resample_ratio =:}',
+        f'{max_n_splits=:}',
+
+        f'mu_mean={mu.mean()}',
+        f'sigma_mean={sigma.mean()}',
+        f'xi_mean={xi.mean()}',
+
+        f'mu_std={mu.std()}',
+        f'sigma_std={sigma.std()}',
+        f'xi_std={xi.std()}',
+
+        f'mu_max={mu.max()}',
+        f'sigma_max={sigma.max()}',
+        f'xi_max={xi.max()}',
+
+        f'mu_min={mu.min()}',
+        f'sigma_min={sigma.min()}',
+        f'xi_min={xi.min()}',
+
+        f'mu_median={np.quantile(mu, q=0.5)}',
+        f'sigma_median={np.quantile(sigma, q=0.5)}',
+        f'xi_median={np.quantile(xi, 0.5)}',
+
+        f'mu_upper={np.quantile(mu, 0.75)}',
+        f'sigma_upper={np.quantile(sigma, 0.75)}',
+        f'xi_upper={np.quantile(xi, 0.75)}',
+
+        f'mu_lower={np.quantile(mu, 0.25)}',
+        f'sigma_lower={np.quantile(sigma, 0.25)}',
+        f'xi_lower={np.quantile(xi, 0.25)}',
+    ])
+
+    return print_items
 
 
 def _fit_predict_all():
-    ensemble_sizes = [1, 10, 100, 200, 500, 800, 1000, 1500, 2000]
-    resample_ratios = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    ensemble_sizes = [1, 10, 100, 200, 500, 800, 1000]
+    resample_ratios = [0.1, 0.3, 0.5, 0.7, 0.9]
     max_splits = [1, 3, 6, 10, 12, 16, 20]
 
-    pool = Pool(processes=128)
+    with Pool() as pool:
+        param_all_runs = product(ensemble_sizes, resample_ratios, max_splits)
+        print_items = pool.starmap(_fit_predict_once, param_all_runs)
 
-    for ensemble_size, resample_ratio, max_n_split in product(ensemble_sizes, resample_ratios,
-                                                              max_splits):
-        mu, sigma, xi = pool.map(
-            _fit_predict_once,
-            (ensemble_size,
-             resample_ratio,
-             max_n_split)
-        )
-
-        print_items = ','.join([
-            f'{ensemble_size=:}',
-            f'{resample_ratio =:}',
-            f'{max_n_split=:}',
-
-            f'mu_mean={mu.mean()}',
-            f'sigma_mean={sigma.mean()}',
-            f'xi_mean={xi.mean()}',
-
-            f'mu_std={mu.std()}',
-            f'sigma_std={sigma.std()}',
-            f'xi_std={xi.std()}',
-
-            f'mu_max={mu.max()}',
-            f'sigma_max={sigma.max()}',
-            f'xi_max={xi.max()}',
-
-            f'mu_min={mu.min()}',
-            f'sigma_min={sigma.min()}',
-            f'xi_min={xi.min()}',
-
-            f'mu_median={np.quantile(mu, q=0.5)}',
-            f'sigma_median={np.quantile(sigma, q=0.5)}',
-            f'xi_median={np.quantile(xi, 0.5)}',
-
-            f'mu_upper={np.quantile(mu, 0.75)}',
-            f'sigma_upper={np.quantile(sigma, 0.75)}',
-            f'xi_upper={np.quantile(xi, 0.75)}',
-
-            f'mu_lower={np.quantile(mu, 0.25)}',
-            f'sigma_lower={np.quantile(sigma, 0.25)}',
-            f'xi_lower={np.quantile(xi, 0.25)}',
-        ])
-
-        print(print_items)
+    print('\n'.join(print_items))
 
 
 def _main():
     _fit_predict_all()
 
 
-_main()
+if __name__ == '__main__':
+    _main()
