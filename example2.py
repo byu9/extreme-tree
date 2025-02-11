@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import os
 from itertools import product
-from multiprocessing import Pool
 
 import numpy as np
+import pandas as pd
 from scipy.stats import norm
 
 from extreme_tree import ExtremeForest
@@ -26,69 +26,58 @@ def _fit_predict_once(ensemble_size, resample_ratio, max_n_splits):
     model.fit(x, y)
     mu, sigma, xi = model.predict(x)
 
-    cov = np.cov(np.stack([mu, sigma, xi], axis=-1).squeeze())
+    report = pd.DataFrame({
+        'ensemble_size': ensemble_size,
+        'resample_ratio': resample_ratio,
+        'max_n_splits': max_n_splits,
 
-    print_items = ','.join([
-        f'{ensemble_size=:}',
-        f'{resample_ratio =:}',
-        f'{max_n_splits=:}',
+        'mu_mean': mu.mean(),
+        'mu_std': mu.std(),
+        'mu_max': mu.max(),
+        'mu_min': mu.min(),
+        'mu_upper': np.quantile(mu, q=0.75),
+        'mu_lower': np.quantile(mu, q=0.25),
+        'mu_median': np.quantile(mu, q=0.5),
 
-        f'mu_mean={mu.mean()}',
-        f'sigma_mean={sigma.mean()}',
-        f'xi_mean={xi.mean()}',
+        'sigma_mean': sigma.mean(),
+        'sigma_std': sigma.std(),
+        'sigma_max': sigma.max(),
+        'sigma_min': sigma.min(),
+        'sigma_upper': np.quantile(sigma, q=0.75),
+        'sigma_lower': np.quantile(sigma, q=0.25),
+        'sigma_median': np.quantile(sigma, q=0.5),
 
-        f'mu_std={mu.std()}',
-        f'sigma_std={sigma.std()}',
-        f'xi_std={xi.std()}',
+        'xi_mean': xi.mean(),
+        'xi_std': xi.std(),
+        'xi_max': xi.max(),
+        'xi_min': xi.min(),
+        'xi_upper': np.quantile(xi, q=0.75),
+        'xi_lower': np.quantile(xi, q=0.25),
+        'xi_median': np.quantile(xi, q=0.5),
+    }, index=[1])
 
-        f'cov00={cov[0, 0]}',
-        f'cov01={cov[0, 1]}',
-        f'cov02={cov[0, 2]}',
-        f'cov10={cov[1, 0]}',
-        f'cov11={cov[1, 1]}',
-        f'cov12={cov[1, 2]}',
-        f'cov10={cov[2, 0]}',
-        f'cov11={cov[2, 1]}',
-        f'cov12={cov[2, 2]}',
-
-        f'mu_max={mu.max()}',
-        f'sigma_max={sigma.max()}',
-        f'xi_max={xi.max()}',
-
-        f'mu_min={mu.min()}',
-        f'sigma_min={sigma.min()}',
-        f'xi_min={xi.min()}',
-
-        f'mu_median={np.quantile(mu, q=0.5)}',
-        f'sigma_median={np.quantile(sigma, q=0.5)}',
-        f'xi_median={np.quantile(xi, 0.5)}',
-
-        f'mu_upper={np.quantile(mu, 0.75)}',
-        f'sigma_upper={np.quantile(sigma, 0.75)}',
-        f'xi_upper={np.quantile(xi, 0.75)}',
-
-        f'mu_lower={np.quantile(mu, 0.25)}',
-        f'sigma_lower={np.quantile(sigma, 0.25)}',
-        f'xi_lower={np.quantile(xi, 0.25)}',
-    ])
-
-    return print_items
+    return report
 
 
 def _fit_predict_all():
     ensemble_sizes = [1, 10, 20, 30, 40, 50]
     resample_ratios = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-    max_splits = [1, 2, 3, 4, 5]
+    max_n_splits = [1, 2, 3, 4, 5]
 
-    with Pool() as pool:
-        param_all_runs = product(ensemble_sizes, resample_ratios, max_splits)
-        print_items = pool.starmap(_fit_predict_once, param_all_runs)
+    param_all_runs = product(ensemble_sizes, resample_ratios, max_n_splits)
 
-    print('\n'.join(print_items))
+    results = list()
+    for param in param_all_runs:
+        results.append(_fit_predict_once(*param))
+
+    report = pd.concat(results, axis='index')
+
+    return report
 
 
 def _main():
-    _fit_predict_all()
+    report = _fit_predict_all()
+    report.to_csv('example2.csv')
 
 
 if __name__ == '__main__':
