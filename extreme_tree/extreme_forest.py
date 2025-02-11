@@ -17,7 +17,7 @@ class ExtremeForest:
         self._ensemble = tqdm([
             ExtremeTree(**weak_args)
             for _ in range(ensemble_size)
-        ])
+        ], leave=False)
         self._ensemble.set_description('Ensemble')
         self._resample_ratio = resample_ratio
         self._random_gen = np.random.default_rng()
