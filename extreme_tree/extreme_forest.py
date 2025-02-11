@@ -13,7 +13,7 @@ class ExtremeForest:
         '_random_gen'
     )
 
-    def __init__(self, ensemble_size: int, resample_ratio: float | None, **weak_args):
+    def __init__(self, ensemble_size=100, resample_ratio=0.5, **weak_args):
         self._ensemble = tqdm([
             ExtremeTree(**weak_args)
             for _ in range(ensemble_size)
