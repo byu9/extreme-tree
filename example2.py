@@ -26,7 +26,7 @@ def _fit_predict_once(ensemble_size, resample_ratio, max_n_splits):
     model.fit(x, y)
     mu, sigma, xi = model.predict(x)
 
-    cov = np.cov(np.stack([mu, sigma, xi], axis=0))
+    cov = np.cov(np.stack([mu, sigma, xi], axis=-1).squeeze())
 
     print_items = ','.join([
         f'{ensemble_size=:}',
