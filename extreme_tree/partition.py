@@ -18,6 +18,9 @@ class Partition:
 
         # Distribution parameters
         'params',
+
+        # Firing strengths
+        'pi',
     )
 
     def __init__(self, feature, target):
@@ -32,8 +35,9 @@ class Partition:
 
         self.feature_id = None
         self.threshold = None
-        self.p_value = None
+        self.p_value = np.inf
         self.params = None
+        self.pi = None
 
     def split_partition(self, feature_id, threshold):
         split_mask = self.feature[feature_id] <= threshold
@@ -74,8 +78,3 @@ class Partition:
             self.feature_id = feature_ids[best_split]
             self.threshold = thresholds[best_split]
             self.p_value = p_values[best_split]
-
-            return self.split_partition(feature_id=self.feature_id, threshold=self.threshold)
-
-        else:
-            self.p_value = np.inf

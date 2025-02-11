@@ -1,2 +1,2 @@
-from ._extreme_forest import ExtremeForest
-from ._extreme_tree import ExtremeTree
+from .extreme_forest import ExtremeForest
+from .extreme_tree import ExtremeTree

@@ -1,9 +1,9 @@
 import numpy as np
 from tqdm.auto import tqdm
 
-from ._extreme_tree import ExtremeTree
-from ._misc import validate_feature
-from ._misc import validate_feature_target
+from .extreme_tree import ExtremeTree
+from .validation import validate_feature
+from .validation import validate_feature_target
 
 
 class ExtremeForest:
@@ -38,6 +38,7 @@ class ExtremeForest:
 
         weak_predictions = list()
         for weak_learner in self._ensemble:
-            weak_predictions.append(weak_learner.predict(feature, return_dist=False))
+            weak_predictions.append(weak_learner.predict(feature))
 
-        return sum(weak_predictions) / len(weak_predictions)
+        weak_predictions = np.stack(weak_predictions, axis=-1)
+        return np.mean(weak_predictions, axis=-1)
