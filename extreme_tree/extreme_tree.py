@@ -35,7 +35,7 @@ class ExtremeTree:
             self,
             distribution='gev',
             max_n_splits=10,
-            min_partition_size=3,
+            min_partition_size=10,
             alpha=0.05,
             statistic='anderson',
     ):
