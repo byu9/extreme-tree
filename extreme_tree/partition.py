@@ -41,7 +41,7 @@ class Partition:
         right_part = Partition(self.feature[:, ~split_mask], self.target[:, ~split_mask])
         return left_part, right_part
 
-    def _split_candidates(self, min_partition_size):
+    def _split_candidates(self, min_partition_size, statistic_func=anderson_darling):
         n_features, n_samples = self.feature.shape
         feature_ids = tqdm(range(n_features), desc='Feature', leave=False)
         for feature_id in feature_ids:
@@ -59,11 +59,11 @@ class Partition:
                     left_target = sort_target[:, :split_index]
                     right_target = sort_target[:, split_index:]
 
-                    statistic = anderson_darling(left_target, right_target)
+                    statistic = statistic_func(left_target, right_target)
                     yield feature_id, threshold, statistic
 
-    def evolve(self, min_partition_size):
-        split_statistics = self._split_candidates(min_partition_size)
+    def evolve(self, min_partition_size, statistic_func):
+        split_statistics = self._split_candidates(min_partition_size, statistic_func)
         candidates = list(zip(*split_statistics))
 
         if candidates:
