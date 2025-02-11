@@ -2,6 +2,11 @@ import numpy as np
 import pandas as pd
 
 
+def ensure_size_at_least(sample, min_size=2):
+    if sample.size < min_size:
+        raise ValueError(f'Sample size must be at least {min_size}.')
+
+
 def validate_feature(feature):
     if isinstance(feature, pd.DataFrame):
         feature = feature.to_numpy()

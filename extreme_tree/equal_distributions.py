@@ -1,9 +1,6 @@
 import numpy as np
 
-
-def _ensure_size_at_least(sample, min_size=2):
-    if sample.size < min_size:
-        raise ValueError(f'Sample size must be at least {min_size}.')
+from .validation import ensure_size_at_least
 
 
 def empirical_cdf(population):
@@ -37,8 +34,8 @@ def anderson_darling(sample1, sample2):
     sample1 = np.ravel(sample1)
     sample2 = np.ravel(sample2)
 
-    _ensure_size_at_least(sample1, min_size=2)
-    _ensure_size_at_least(sample2, min_size=2)
+    ensure_size_at_least(sample1, min_size=2)
+    ensure_size_at_least(sample2, min_size=2)
 
     n1 = len(sample1)
     n2 = len(sample2)
