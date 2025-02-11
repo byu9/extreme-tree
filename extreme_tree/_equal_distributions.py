@@ -16,9 +16,9 @@ def _empirical_cdf(population):
 def _empirical_p_values(values, population):
     values = np.reshape(values, shape=(-1, 1))
     cdf_v, cdf_p = _empirical_cdf(population)
-    index = np.searchsorted(cdf_v, values, side='left').ravel()
+    p_values = np.interp(values, cdf_v, cdf_p, left=0, right=1)
 
-    return cdf_p[index]
+    return p_values
 
 
 def kolmogorov_smirnov(sample1, sample2):
