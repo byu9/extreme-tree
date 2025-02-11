@@ -153,7 +153,8 @@ class ExtremeTree:
             self._tree.add_node(right_child, parent=best_leaf, is_left=False)
 
     def _forward_prop(self, feature, return_dist: bool):
-        self._tree.root.pi = 1.0
+        n_features, n_samples = feature.shape
+        self._tree.root.pi = np.ones(shape=n_samples)
 
         for node in self._tree.topological_ordering():
             if node not in self._tree.leaves:
