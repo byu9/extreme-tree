@@ -6,24 +6,24 @@ def _ensure_size_at_least(sample, min_size=2):
         raise ValueError(f'Sample size must be at least {min_size}.')
 
 
-def _empirical_cdf(population):
+def empirical_cdf(population):
     population = np.ravel(population)
     cdf_v, counts = np.unique(population, return_counts=True)
     cdf_p = np.cumsum(counts) / len(population)
     return cdf_v, cdf_p
 
 
-def _empirical_p_values(values, population):
+def empirical_p_values(values, population):
     values = np.reshape(values, shape=(-1, 1))
-    cdf_v, cdf_p = _empirical_cdf(population)
+    cdf_v, cdf_p = empirical_cdf(population)
     p_values = np.interp(values, cdf_v, cdf_p, left=0, right=1)
 
     return p_values
 
 
 def kolmogorov_smirnov(sample1, sample2):
-    cdf_v1, cdf_p1 = _empirical_cdf(sample1)
-    cdf_v2, cdf_p2 = _empirical_cdf(sample2)
+    cdf_v1, cdf_p1 = empirical_cdf(sample1)
+    cdf_v2, cdf_p2 = empirical_cdf(sample2)
 
     cdf_v = np.unique(np.concat([cdf_v1, cdf_v2]))
     ecdf_vert1 = np.interp(cdf_v, cdf_v1, cdf_p1)
