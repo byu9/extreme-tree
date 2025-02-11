@@ -44,10 +44,23 @@ class GenExtreme:
         return prediction
 
 
+def _empirical_cdf(sample, axis=None):
+    cdf_hori, counts = np.unique(sample, return_counts=True, axis=axis)
+    cdf_vert = np.cumsum(counts) / (sample.shape[axis] if axis is not None else sample.size)
+    return cdf_hori, cdf_vert
+
+
+def _kolmogorov_smirnov_test(mu, sigma, xi, y):
+    ecdf_hori, ecdf_vert = _empirical_cdf(y)
+    cdf_vert = genextreme.cdf(ecdf_hori, loc=mu, scale=sigma, c=-xi)
+    statistic = np.abs(ecdf_vert - cdf_vert).max()
+    return statistic
+
+
 def _log_score(mu, sigma, xi, y):
     logpdf = genextreme.logpdf(y, loc=mu, scale=sigma, c=-xi)
 
-    logpdf_outside_support = -1000
+    logpdf_outside_support = 0
     np.nan_to_num(logpdf, nan=logpdf_outside_support, neginf=logpdf_outside_support, copy=False)
 
     return -logpdf
