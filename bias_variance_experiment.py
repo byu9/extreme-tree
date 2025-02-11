@@ -20,11 +20,13 @@ def _create_block_maxima(n_samples, block_size=50):
 
 
 def _fit_predict_once(ensemble_size, resample_ratio, max_n_splits):
-    x, y = _create_block_maxima(n_samples=1000)
+    x, y = _create_block_maxima(n_samples=500)
     model = ExtremeForest(ensemble_size=ensemble_size, resample_ratio=resample_ratio,
                           max_n_splits=max_n_splits)
     model.fit(x, y)
     mu, sigma, xi = model.predict(x)
+
+    cov = np.cov(np.stack([mu, sigma, xi], axis=0))
 
     print_items = ','.join([
         f'{ensemble_size=:}',
@@ -38,6 +40,16 @@ def _fit_predict_once(ensemble_size, resample_ratio, max_n_splits):
         f'mu_std={mu.std()}',
         f'sigma_std={sigma.std()}',
         f'xi_std={xi.std()}',
+
+        f'cov00={cov[0, 0]}',
+        f'cov01={cov[0, 1]}',
+        f'cov02={cov[0, 2]}',
+        f'cov10={cov[1, 0]}',
+        f'cov11={cov[1, 1]}',
+        f'cov12={cov[1, 2]}',
+        f'cov10={cov[2, 0]}',
+        f'cov11={cov[2, 1]}',
+        f'cov12={cov[2, 2]}',
 
         f'mu_max={mu.max()}',
         f'sigma_max={sigma.max()}',
@@ -64,9 +76,9 @@ def _fit_predict_once(ensemble_size, resample_ratio, max_n_splits):
 
 
 def _fit_predict_all():
-    ensemble_sizes = [1, 10, 100, 200, 500, 800, 1000]
+    ensemble_sizes = [1, 10, 100, 200, 500, 800]
     resample_ratios = [0.1, 0.3, 0.5, 0.7, 0.9]
-    max_splits = [1, 3, 6, 10, 12, 16, 20]
+    max_splits = [1, 3, 6, 10, 12]
 
     with Pool() as pool:
         param_all_runs = product(ensemble_sizes, resample_ratios, max_splits)
