@@ -76,9 +76,9 @@ def _fit_predict_once(ensemble_size, resample_ratio, max_n_splits):
 
 
 def _fit_predict_all():
-    ensemble_sizes = [1, 10, 100, 200, 500, 800]
-    resample_ratios = [0.1, 0.3, 0.5, 0.7, 0.9]
-    max_splits = [1, 3, 6, 10, 12]
+    ensemble_sizes = [1, 10, 20, 30, 40, 50]
+    resample_ratios = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    max_splits = [1, 2, 3, 4, 5]
 
     with Pool() as pool:
         param_all_runs = product(ensemble_sizes, resample_ratios, max_splits)
