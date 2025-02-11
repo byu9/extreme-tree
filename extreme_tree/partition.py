@@ -15,6 +15,9 @@ class Partition:
         'feature_id',
         'threshold',
         'p_value',
+
+        # Distribution parameters
+        'params',
     )
 
     def __init__(self, feature, target):
@@ -30,6 +33,7 @@ class Partition:
         self.feature_id = None
         self.threshold = None
         self.p_value = None
+        self.params = None
 
     def split_partition(self, feature_id, threshold):
         split_mask = self.feature[feature_id] <= threshold
