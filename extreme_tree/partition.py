@@ -39,7 +39,7 @@ class Partition:
 
     def _split_candidates(self, min_partition_size):
         n_features, n_samples = self.feature.shape
-        feature_ids = tqdm(range(n_features), desc='Feature')
+        feature_ids = tqdm(range(n_features), desc='Feature', leave=False)
         for feature_id in feature_ids:
             sort_indices = self.feature[feature_id].argsort()
             sort_feature = self.feature[:, sort_indices]
