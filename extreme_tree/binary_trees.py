@@ -64,15 +64,15 @@ class BinaryTree:
 
     @property
     def nodes(self):
-        return self._nodes
+        return list(self._nodes)
 
     @property
     def leaves(self):
-        return self._leaves
+        return list(self._leaves)
 
     @property
     def non_leaves(self):
-        return self._non_leaves
+        return list(self._non_leaves)
 
     def __contains__(self, node):
         return node in self._nodes
