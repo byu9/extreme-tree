@@ -42,9 +42,12 @@ def anderson_darling(sample1, sample2):
     n = n1 + n2
     j = np.arange(1, n)
 
+    values1 = np.unique(sample1)
+    values2 = np.unique(sample2)
+
     z = np.sort(np.concat([sample1, sample2])).reshape(-1, 1)
-    m1 = np.count_nonzero(sample1 <= z, axis=-1)[1:]
-    m2 = np.count_nonzero(sample2 <= z, axis=-1)[1:]
+    m1 = np.searchsorted(values1, z, side='right')[:-1].reshape(-1)
+    m2 = np.searchsorted(values2, z, side='right')[:-1].reshape(-1)
 
     term1 = np.square(n * m1 - j * n1) / j / (n - j) / n1
     term2 = np.square(n * m2 - j * n2) / j / (n - j) / n2
