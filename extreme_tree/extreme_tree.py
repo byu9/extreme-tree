@@ -1,10 +1,9 @@
-from operator import attrgetter
-
 import numpy as np
 from tqdm.auto import tqdm
 
 from .binary_trees import BinaryTree
 from .equal_distributions import anderson_darling
+from .equal_distributions import empirical_cdf_value
 from .equal_distributions import kolmogorov_smirnov
 from .genextreme import GenExtreme
 from .partition import Partition
@@ -62,15 +61,28 @@ class ExtremeTree:
         self._tree.add_node(root_node)
 
         for _ in tqdm(range(self._max_n_splits), desc='Round', leave=False):
-            best_leaf = min(self._tree.leaves, key=attrgetter('p_value'))
+            candidate_leaves = [
+                leaf for leaf in self._tree.leaves
+                if leaf.null_statistics is not None
+            ]
 
-            if not (best_leaf.p_value <= self._alpha):
+            if not candidate_leaves:
                 break
 
-            left_child, right_child = best_leaf.split_partition(
-                feature_id=best_leaf.feature_id,
-                threshold=best_leaf.threshold
-            )
+            null_statistics = np.concat([leaf.null_statistics for leaf in candidate_leaves])
+            cdf_values = np.array([
+                empirical_cdf_value(leaf.best_statistic, population=null_statistics)
+                for leaf in candidate_leaves
+            ])
+
+            p_values = 1 - cdf_values
+            best_index = p_values.argmin()
+            best_leaf = candidate_leaves[best_index]
+
+            if not (p_values[best_index] <= self._alpha):
+                break
+
+            left_child, right_child = best_leaf.split()
 
             left_child.evolve(
                 min_partition_size=self._min_partition_size,

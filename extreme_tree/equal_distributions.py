@@ -10,7 +10,7 @@ def empirical_cdf(population):
     return cdf_v, cdf_p
 
 
-def empirical_p_values(values, population):
+def empirical_cdf_value(values, population):
     values = np.reshape(values, shape=(-1, 1))
     cdf_v, cdf_p = empirical_cdf(population)
     p_values = np.interp(values, cdf_v, cdf_p, left=0, right=1)
