@@ -54,3 +54,29 @@ def anderson_darling(sample1, sample2):
     statistic = np.sum(term1 + term2) / n
 
     return statistic
+
+
+def anderson_darling_k(samples):
+    samples = [np.ravel(sample) for sample in samples]
+
+    for sample in samples:
+        ensure_size_at_least(sample, min_size=2)
+
+    n_k_list = np.array([len(sample) for sample in samples])
+    n = n_k_list.sum()
+    j = np.arange(1, n)
+
+    values_list = [np.unique(sample) for sample in samples]
+
+    z = np.sort(np.concat(samples)).reshape(-1, 1)
+    m_k_list = [
+        np.searchsorted(values, z, side='right')[:-1].reshape(-1)
+        for values in values_list
+    ]
+
+    statistic = sum(
+        np.sum(np.square(n * m_k - j * n_k) / j / (n - j)) / n_k
+        for m_k, n_k in zip(m_k_list, n_k_list)
+    ) / n
+
+    return statistic
