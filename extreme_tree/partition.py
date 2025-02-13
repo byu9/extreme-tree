@@ -2,6 +2,7 @@ import numpy as np
 from tqdm.auto import tqdm
 
 from extreme_tree.equal_distributions import anderson_darling
+from extreme_tree.equal_distributions import empirical_p_values
 
 
 class Partition:
@@ -13,10 +14,7 @@ class Partition:
         # The best splitting criteria
         'feature_id',
         'threshold',
-        'best_statistic',
-
-        # The null population
-        'null_statistics',
+        'p_value',
 
         # Distribution parameters
         'params',
@@ -37,13 +35,12 @@ class Partition:
 
         self.feature_id = None
         self.threshold = None
-        self.best_statistic = -np.inf
-        self.null_statistics = None
+        self.p_value = np.inf
         self.params = None
         self.pi = None
 
-    def split(self):
-        split_mask = self.feature[self.feature_id] <= self.threshold
+    def split_partition(self, feature_id, threshold):
+        split_mask = self.feature[feature_id] <= threshold
         left_part = Partition(self.feature[:, split_mask], self.target[:, split_mask])
         right_part = Partition(self.feature[:, ~split_mask], self.target[:, ~split_mask])
         return left_part, right_part
@@ -75,9 +72,9 @@ class Partition:
 
         if candidates:
             feature_ids, thresholds, statistics = candidates
-            best_split = np.argmax(statistics)
+            p_values = 1 - empirical_p_values(statistics, population=statistics)
+            best_split = p_values.argmin()
 
-            self.null_statistics = statistics
-            self.best_statistic = statistics[best_split]
             self.feature_id = feature_ids[best_split]
             self.threshold = thresholds[best_split]
+            self.p_value = p_values[best_split]
