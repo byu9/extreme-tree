@@ -1,5 +1,3 @@
-from operator import attrgetter
-
 import numpy as np
 from tqdm.auto import tqdm
 
@@ -62,15 +60,18 @@ class ExtremeTree:
         self._tree.add_node(root_node)
 
         for _ in tqdm(range(self._max_n_splits), desc='Round', leave=False):
-            best_leaf = min(self._tree.leaves, key=attrgetter('p_value'))
+            candidate_leaves = [
+                leaf for leaf in self._tree.leaves
+                if leaf.statistic is not None
+            ]
 
-            if not (best_leaf.p_value <= self._alpha):
+            if not candidate_leaves:
                 break
 
-            left_child, right_child = best_leaf.split_partition(
-                feature_id=best_leaf.feature_id,
-                threshold=best_leaf.threshold
-            )
+            statistics = np.array([leaf.statistic for leaf in candidate_leaves])
+            best_leaf = candidate_leaves[statistics.argmax()]
+
+            left_child, right_child = best_leaf.split()
 
             left_child.evolve(
                 min_partition_size=self._min_partition_size,
