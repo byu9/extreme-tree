@@ -3,7 +3,6 @@ from tqdm.auto import tqdm
 
 from .binary_trees import BinaryTree
 from .equal_distributions import anderson_darling
-from .equal_distributions import anderson_darling_k
 from .equal_distributions import kolmogorov_smirnov
 from .genextreme import GenExtreme
 from .partition import Partition
@@ -69,19 +68,7 @@ class ExtremeTree:
             if not candidate_leaves:
                 break
 
-            samples_list = list()
-            for leaf in candidate_leaves:
-                left, right = leaf.split()
-                samples = [other.target for other in candidate_leaves if other is not leaf]
-                samples.append(left.target)
-                samples.append(right.target)
-                samples_list.append(samples)
-
-            statistics = np.array([
-                anderson_darling_k(samples)
-                for samples in samples_list
-            ])
-
+            statistics = np.array([leaf.statistic for leaf in candidate_leaves])
             best_leaf = candidate_leaves[statistics.argmax()]
 
             left_child, right_child = best_leaf.split()
