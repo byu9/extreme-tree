@@ -24,7 +24,7 @@ class Partition:
 
     def __init__(self, feature, target):
         _, n_feature_samples = feature.shape
-        _, n_target_samples = target.shape
+        n_target_samples = len(target)
 
         if n_feature_samples != n_target_samples:
             raise ValueError(f'Feature and target must have the same number of samples.')
@@ -40,8 +40,8 @@ class Partition:
 
     def split(self):
         split_mask = self.feature[self.feature_id] <= self.threshold
-        left_part = Partition(self.feature[:, split_mask], self.target[:, split_mask])
-        right_part = Partition(self.feature[:, ~split_mask], self.target[:, ~split_mask])
+        left_part = Partition(self.feature[:, split_mask], self.target[split_mask])
+        right_part = Partition(self.feature[:, ~split_mask], self.target[~split_mask])
         return left_part, right_part
 
     def _split_candidates(self, min_partition_size, statistic_func=anderson_darling):
@@ -50,7 +50,7 @@ class Partition:
         for feature_id in feature_ids:
             sort_indices = self.feature[feature_id].argsort()
             sort_feature = self.feature[:, sort_indices]
-            sort_target = self.target[:, sort_indices]
+            sort_target = self.target[sort_indices]
 
             unique_values = np.unique(sort_feature[feature_id])
             midpoints = (unique_values[:-1] + unique_values[1:]) / 2
@@ -59,8 +59,8 @@ class Partition:
                 split_index = np.searchsorted(sort_feature[feature_id], threshold, side='right')
 
                 if min_partition_size <= split_index <= n_samples - min_partition_size:
-                    left_target = sort_target[:, :split_index]
-                    right_target = sort_target[:, split_index:]
+                    left_target = sort_target[:split_index]
+                    right_target = sort_target[split_index:]
 
                     statistic = statistic_func(left_target, right_target)
                     yield feature_id, threshold, statistic

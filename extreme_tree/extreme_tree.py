@@ -111,7 +111,7 @@ class ExtremeTree:
     def fit(self, feature, target):
         feature, target = validate_feature_target(feature, target)
         feature = feature.transpose()
-        target = target.transpose()
+        target = target.ravel()
         self._build_tree(feature, target)
 
     def predict(self, feature, convert_to_scipy: bool = False):
@@ -119,7 +119,6 @@ class ExtremeTree:
         feature = validate_feature(feature)
         feature = feature.transpose()
         predict = self._forward_prop(feature)
-        predict = np.moveaxis(predict, [1, 2], [-1, -2])
 
         if convert_to_scipy:
             predict = self._distribution.convert_to_scipy(predict)

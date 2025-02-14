@@ -9,7 +9,8 @@ class GenExtreme:
     @staticmethod
     def estimate(target):
         mu, sigma, xi = _pwm_estimate(target)
-        return np.stack([mu, sigma, xi], axis=0)
+        params = np.stack([mu, sigma, xi], axis=0)
+        return params
 
     @staticmethod
     def convert_to_scipy(params):
@@ -20,8 +21,10 @@ class GenExtreme:
 def _pwm_estimate(target):
     # Probability weighted moment estimate
     # See https://doi.org/10.1080/00401706.1985.10488049
-    x = np.sort(target, axis=-1)
-    n = target.shape[-1]
+    target = target.ravel()
+
+    x = np.sort(target)
+    n = len(target)
     j = np.arange(1, n + 1)
 
     if n <= 2:
