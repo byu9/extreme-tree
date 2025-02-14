@@ -79,11 +79,7 @@ def compile_datasets():
     forecasting['DoW'] = forecasting.index.dayofweek
     forecasting['Month'] = forecasting.index.month
 
-    feature = forecasting.drop(columns='MW_max')
-    target = forecasting[['MW_max']]
-
-    feature.to_csv('forecast-feature.csv')
-    target.to_csv('forecast-target.csv')
+    forecasting.to_csv('forecasting.csv')
     generation_daily.to_csv('generation.csv')
 
 
