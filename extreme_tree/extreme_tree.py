@@ -104,7 +104,7 @@ class ExtremeTree:
 
         pi = np.stack([leaf.pi for leaf in self._tree.leaves], axis=-1)
         params = np.stack([leaf.params for leaf in self._tree.leaves], axis=-1)
-        prediction = np.sum(pi * params, axis=-1)
+        prediction = np.nansum(pi * params, axis=-1)
 
         return prediction
 
