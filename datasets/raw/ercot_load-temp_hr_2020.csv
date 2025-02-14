@@ -1,6 +1,6 @@
 ERCOT Hourly Load, Load Forecast, and Temperatures
 Hourly actual load, load forecast, and temperature data for ERCOT
-Source: Load Data from ERCOT; Temperature Data from NOAA
+Source: Load Data from ERCOT; Temperature Data from NOAA,,,,,,,,,,,,,,
 UTC Timestamp (Interval Ending),Local Timestamp Central Time (Interval Beginning),Local Timestamp Central Time (Interval Ending),Local Date,Hour Number,TOT Actual Load (MW),Coast Actual Load (MW),East Actual Load (MW),FWEST Actual Load (MW),NCENT Actual Load (MW),North Actual Load (MW),SCENT Actual Load (MW),South Actual Load (MW),West Actual Load (MW),Dallas / Fort Worth Temperature (Fahrenheit),Dallas / Fort Worth Temperature Observation Time (Central),Houston International Airport Temperature (Fahrenheit),Houston International Airport Temperature Observation Time (Central)
 2020-01-01 07:00:00,2020-01-01 00:00:00,2020-01-01 01:00:00,2020-01-01,1,36824.115099,9890.091522,1364.278198,3721.972022,11719.863767,773.878822,5473.246071,2707.841517,1172.943179,42.1,2020-01-01 00:53:00,48.0,2020-01-01 00:53:00
 2020-01-01 08:00:00,2020-01-01 01:00:00,2020-01-01 02:00:00,2020-01-01,2,36531.366488,9751.586415,1369.569694,3735.514034,11639.455987,775.063743,5387.380467,2706.844837,1165.951313,42.1,2020-01-01 01:53:00,48.0,2020-01-01 01:53:00
