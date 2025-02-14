@@ -61,26 +61,32 @@ def compile_datasets():
     generation = compile_fragments(generation_files, read_func=read_generation)
     load = compile_fragments(load_files, read_func=read_load)
     temperature = compile_fragments(load_files, read_func=read_temperature)
+    interval = '1d'
 
-    generation_daily = generation.resample('1d').mean()
-    temperature_daily = temperature.resample('1d').mean()
-    load_daily = load.resample('1d').mean()
+    generation_interval = generation.resample(interval).mean().ffill()
+    temperature_interval = temperature.resample(interval).mean().ffill()
+    load_interval = load.resample(interval).mean().ffill()
 
-    load_daily_max = load.resample('1d').max().add_suffix('_max')
-    load_daily_min = load.resample('1d').min().add_suffix('_min')
+    load_interval_max = load.resample(interval).max().ffill().add_suffix('_max')
+    load_interval_min = load.resample(interval).min().ffill().add_suffix('_min')
 
-    load_shifted = load_daily.shift([1, 2, 7])
+    load_shifted = load_interval.shift([1, 2, 7])
 
-    forecasting = load_daily_max.join([load_shifted, temperature_daily], sort=True)
-    forecasting.dropna(axis='index', inplace=True)
+    forecasting_interval = load_interval_max.join([load_shifted, temperature_interval], sort=True)
+    forecasting_interval.dropna(axis='index', inplace=True)
 
-    forecasting['Hour'] = forecasting.index.hour
-    forecasting['Day'] = forecasting.index.day
-    forecasting['DoW'] = forecasting.index.dayofweek
-    forecasting['Month'] = forecasting.index.month
+    forecasting_interval['Hour'] = forecasting_interval.index.hour
+    forecasting_interval['Day'] = forecasting_interval.index.day
+    forecasting_interval['DoW'] = forecasting_interval.index.dayofweek
+    forecasting_interval['Month'] = forecasting_interval.index.month
 
-    forecasting.to_csv('forecasting.csv')
-    generation_daily.to_csv('generation.csv')
+    forecasting_interval.to_csv('forecasting.csv')
+    generation_interval.to_csv('generation.csv')
 
 
 compile_datasets()
+#
+# from statsmodels.graphics.tsaplots import plot_pacf
+#
+# plot_pacf(load, lags=200)
+# plt.show()
