@@ -20,7 +20,7 @@ def _create_block_maxima(n_samples, block_size=50):
 
 
 def _fit_predict_once(ensemble_size, resample_ratio, max_n_splits):
-    x, y = _create_block_maxima(n_samples=500)
+    x, y = _create_block_maxima(n_samples=1000)
     model = ExtremeForest(ensemble_size=ensemble_size, resample_ratio=resample_ratio,
                           max_n_splits=max_n_splits)
     model.fit(x, y)
@@ -60,9 +60,9 @@ def _fit_predict_once(ensemble_size, resample_ratio, max_n_splits):
 
 
 def _fit_predict_all():
-    ensemble_sizes = [1, 10, 20, 30, 40, 50]
-    resample_ratios = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-    max_n_splits = [1, 2, 3, 4, 5]
+    ensemble_sizes = range(1, 10)
+    resample_ratios = [0.1, 0.5, 0.9]
+    max_n_splits = [1, 4, 8, 12, 20]
 
     param_all_runs = product(ensemble_sizes, resample_ratios, max_n_splits)
 
