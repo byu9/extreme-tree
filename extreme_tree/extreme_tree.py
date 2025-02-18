@@ -114,13 +114,9 @@ class ExtremeTree:
         target = target.ravel()
         self._build_tree(feature, target)
 
-    def predict(self, feature, convert_to_scipy: bool = False):
+    def predict(self, feature):
         self._ensure_fitted()
         feature = validate_feature(feature)
         feature = feature.transpose()
         predict = self._forward_prop(feature)
-
-        if convert_to_scipy:
-            predict = self._distribution.convert_to_scipy(predict)
-
         return predict
