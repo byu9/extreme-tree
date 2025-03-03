@@ -59,7 +59,7 @@ class ExtremeTree:
         self._tree = BinaryTree()
         self._tree.add_node(root_node)
 
-        for _ in tqdm(range(self._max_n_splits), desc='Round', leave=False):
+        for _ in tqdm(range(self._max_n_splits), desc='Split', leave=False):
             candidate_leaves = [
                 leaf for leaf in self._tree.leaves
                 if leaf.statistic is not None

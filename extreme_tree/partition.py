@@ -46,8 +46,7 @@ class Partition:
 
     def _split_candidates(self, min_partition_size, statistic_func=anderson_darling):
         n_features, n_samples = self.feature.shape
-        feature_ids = tqdm(range(n_features), desc='Feature', leave=False)
-        for feature_id in feature_ids:
+        for feature_id in tqdm(range(n_features), desc='Feature', leave=False):
             sort_indices = self.feature[feature_id].argsort()
             sort_feature = self.feature[:, sort_indices]
             sort_target = self.target[sort_indices]
@@ -55,7 +54,7 @@ class Partition:
             unique_values = np.unique(sort_feature[feature_id])
             midpoints = (unique_values[:-1] + unique_values[1:]) / 2
 
-            for threshold in midpoints:
+            for threshold in tqdm(midpoints, desc='Threshold', leave=False):
                 split_index = np.searchsorted(sort_feature[feature_id], threshold, side='right')
 
                 if min_partition_size <= split_index <= n_samples - min_partition_size:
