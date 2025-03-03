@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import os
 from itertools import product
 
 import numpy as np
@@ -8,7 +7,6 @@ from scipy.stats import norm
 
 from extreme_tree import ExtremeForest
 
-os.environ["TQDM_DISABLE"] = "True"
 np.random.seed(123)
 
 
