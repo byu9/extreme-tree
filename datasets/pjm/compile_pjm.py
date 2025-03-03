@@ -108,7 +108,7 @@ def compile_datasets():
     load.to_csv('load.csv', float_format='%.4f')
 
     load_hourly_max = load.resample('1h').max()
-    shifted_max = load_hourly_max.shift([1, 2, 3, 7, 14])
+    shifted_max = load_hourly_max.shift([1, 2, 3, 16, 17, 25, 26])
 
     forecasting = load_hourly_max.join([shifted_max, temperature], sort=True).ffill()
     forecasting.dropna(inplace=True, axis='index')
