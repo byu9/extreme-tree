@@ -5,8 +5,7 @@ from scipy.stats import genextreme
 
 from extreme_tree import ExtremeForest
 
-
-# np.random.seed(123)
+np.random.seed(123)
 
 
 def _create_block_maxima():
