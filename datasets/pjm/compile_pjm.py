@@ -64,7 +64,7 @@ def compile_fragments(filenames, read_func):
 def compile_generation():
     generation_files = [
         f'raw/day_gen_capacity-{year}.csv'
-        for year in [2020, 2021, 2022, 2023, 2024]
+        for year in [2022, 2023, 2024]
     ]
     generation = compile_fragments(generation_files, read_func=read_generation)
     generation = generation.resample('1h').mean()
@@ -75,7 +75,7 @@ def compile_generation():
 def compile_temperature():
     temperature_files = [
         f'raw/da_tempset-{year}.csv'
-        for year in [2020, 2021, 2022, 2023, 2024]
+        for year in [2022, 2023, 2024]
     ]
     temperature = compile_fragments(temperature_files, read_func=read_temperature)
     temperature = temperature.drop(columns=['Zone', 'Kind']).groupby(['Time']).mean()
@@ -86,7 +86,7 @@ def compile_temperature():
 def compile_load():
     load_files = [
         f'raw/hrl_load_estimated-{year}.csv'
-        for year in [2020, 2021, 2022, 2023, 2024]
+        for year in [2022, 2023, 2024]
     ]
 
     load = compile_fragments(load_files, read_func=read_load)
