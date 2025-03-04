@@ -21,7 +21,7 @@ def load_dataset():
 def main():
     (train_feature, train_target), (test_feature, test_target) = load_dataset()
 
-    model = ExtremeForest(ensemble_size=30, resample_ratio=0.8, max_n_splits=40)
+    model = ExtremeForest(ensemble_size=30, resample_ratio=0.8)
     model.fit(train_feature, train_target)
     mu, sigma, xi = model.predict(test_feature)
 
