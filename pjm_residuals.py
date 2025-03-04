@@ -15,7 +15,7 @@ def fit_line(x, y):
 def read_test_target():
     dataset = pd.read_csv('datasets/pjm/forecasting.csv', index_col=0, parse_dates=True)
     test_mask = (dataset.index >= '2024')
-    target = dataset[test_mask]['MW'].to_numpy()
+    target = dataset[test_mask]['MW']
     return target
 
 
@@ -56,6 +56,11 @@ def main():
     prediction = read_prediction()
     target = read_test_target()
     residuals = prediction.mean() - target
+
+    plt.figure()
+    plt.plot(target.index, prediction.mean(), label='predict')
+    plt.plot(target.index, target, label='target')
+    plt.legend()
 
     eval_residual_qq(residuals)
     eval_residual_hist(residuals)
