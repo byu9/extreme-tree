@@ -58,7 +58,10 @@ def main():
     residuals = prediction.mean() - target
 
     mae = abs(residuals).mean()
+    underforecasted = residuals[residuals < 0].mean()
+
     print(f'{mae=:}')
+    print(f'{underforecasted=:}')
 
     plt.figure()
     plt.plot(target.index, prediction.mean(), label='predict')
