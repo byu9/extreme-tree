@@ -32,8 +32,8 @@ class ExtremeTree:
     def __init__(
             self,
             distribution='gev',
-            max_n_splits=10,
-            min_partition_size=10,
+            max_n_splits=40,
+            min_partition_size=3,
             alpha=0.05,
             statistic='anderson',
     ):
