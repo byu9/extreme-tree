@@ -57,6 +57,9 @@ def main():
     target = read_test_target()
     residuals = prediction.mean() - target
 
+    mae = abs(residuals).mean()
+    print(f'{mae=:}')
+
     plt.figure()
     plt.plot(target.index, prediction.mean(), label='predict')
     plt.plot(target.index, target, label='target')
