@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from statsmodels.graphics.tsaplots import plot_acf
 from statsmodels.graphics.tsaplots import plot_pacf
 
-n_lags = 60
+n_lags = 200
 alpha = 0.05
 
 
@@ -17,7 +17,9 @@ def load_target():
 
 def make_plots(target):
     plot_acf(target, lags=n_lags, alpha=alpha)
+    plt.grid()
     plot_pacf(target, lags=n_lags, alpha=alpha)
+    plt.grid()
 
 
 def save_plot_data(target):
@@ -33,6 +35,9 @@ def save_plot_data(target):
         'ci_pacf_lower': pacf_ci[:, 1],
     })
     plot_data.to_csv('pjm_acf_pacf.csv', index_label='Index')
+
+    sort = plot_data['pacf'].argsort()
+    sort[sort >= 36].to_csv('sort.csv')
 
 
 def main():
