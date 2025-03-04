@@ -64,7 +64,7 @@ def compile_fragments(filenames, read_func):
 def compile_generation():
     generation_files = [
         f'raw/day_gen_capacity-{year}.csv'
-        for year in [2022, 2023, 2024]
+        for year in [2021, 2022, 2023, 2024]
     ]
     generation = compile_fragments(generation_files, read_func=read_generation)
     generation = generation.resample('1h').mean()
@@ -75,7 +75,7 @@ def compile_generation():
 def compile_temperature():
     temperature_files = [
         f'raw/da_tempset-{year}.csv'
-        for year in [2022, 2023, 2024]
+        for year in [2021, 2022, 2023, 2024]
     ]
     temperature = compile_fragments(temperature_files, read_func=read_temperature)
     temperature = temperature.drop(columns=['Zone', 'Kind']).groupby(['Time']).mean()
@@ -86,7 +86,7 @@ def compile_temperature():
 def compile_load():
     load_files = [
         f'raw/hrl_load_estimated-{year}.csv'
-        for year in [2022, 2023, 2024]
+        for year in [2021, 2022, 2023, 2024]
     ]
 
     load = compile_fragments(load_files, read_func=read_load)
@@ -108,7 +108,7 @@ def compile_datasets():
     load.to_csv('load.csv', float_format='%.4f')
 
     load_hourly_max = load.resample('1h').max()
-    shifted_max = load_hourly_max.shift([1, 2, 3, 16, 17, 25, 26])
+    shifted_max = load_hourly_max.shift([169, 170, 145, 146, 73, 74])
 
     forecasting = load_hourly_max.join([shifted_max, temperature], sort=True).ffill()
     forecasting.dropna(inplace=True, axis='index')
