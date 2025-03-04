@@ -17,8 +17,7 @@ class ExtremeForest:
         self._ensemble = tqdm([
             ExtremeTree(**weak_args)
             for _ in range(ensemble_size)
-        ], leave=False)
-        self._ensemble.set_description('Ensemble')
+        ], desc='Ensemble', leave=False)
         self._resample_ratio = resample_ratio
         self._random_gen = np.random.default_rng()
 
@@ -27,7 +26,7 @@ class ExtremeForest:
         sample_indices = np.arange(len(target))
         resample_size = int(self._resample_ratio * len(target))
 
-        for weak_learner in tqdm(self._ensemble, desc='Member', leave=False):
+        for weak_learner in self._ensemble:
             selected_indices = self._random_gen.choice(sample_indices, size=resample_size)
             selected_feature = feature[selected_indices]
             selected_target = target[selected_indices]
