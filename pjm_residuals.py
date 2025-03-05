@@ -93,8 +93,8 @@ def main():
     print(f'{underforecasted=:}')
 
     plt.figure()
-    plt.plot(target.index, prediction.mean(), label='predict')
-    plt.plot(target.index, target, label='target')
+    plt.step(target.index, prediction.mean(), label='predict')
+    plt.step(target.index, target, label='target')
     plt.legend()
 
     eval_residual_qq(residuals)
