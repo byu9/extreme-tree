@@ -3,25 +3,17 @@ from scipy.special import gamma
 from scipy.stats import genextreme
 
 
-class GenExtreme:
-    __slots__ = ()
-
-    @staticmethod
-    def estimate(target):
-        mu, sigma, xi = _pwm_estimate(target)
-        params = np.stack([mu, sigma, xi], axis=0)
-        return params
-
-    @staticmethod
-    def convert_to_scipy(params):
-        mu, sigma, xi = params
-        return genextreme(loc=mu, scale=sigma, c=-xi)
+def _log_score(target, params):
+    mu, sigma, xi = params
+    score = -genextreme.logpdf(target, loc=mu, scale=sigma, c=-xi)
+    score = np.nan_to_num(score, copy=False, nan=1e4, posinf=1e4)
+    return score.sum()
 
 
 def _pwm_estimate(target):
     # Probability weighted moment estimate
     # See https://doi.org/10.1080/00401706.1985.10488049
-    target = target.ravel()
+    target = np.ravel(target)
 
     x = np.sort(target)
     n = len(target)
@@ -38,9 +30,9 @@ def _pwm_estimate(target):
     den1 = den0 * (n - 1)
     den2 = den1 * (n - 2)
 
-    b0 = np.sum(num0, axis=-1, keepdims=True) / den0
-    b1 = np.sum(num1, axis=-1, keepdims=True) / den1
-    b2 = np.sum(num2, axis=-1, keepdims=True) / den2
+    b0 = np.sum(num0) / den0
+    b1 = np.sum(num1) / den1
+    b2 = np.sum(num2) / den2
 
     c = (2 * b1 - b0) / (3 * b2 - b0) - np.log(2) / np.log(3)
 
@@ -50,3 +42,26 @@ def _pwm_estimate(target):
     mu = b0 - sigma / xi * (gamma_term - 1)
 
     return mu, sigma, xi
+
+
+_supported_impurity_metrics = {
+    'log_score': _log_score
+}
+
+
+class GenExtreme:
+    __slots__ = (
+        '_impurity_func'
+    )
+
+    def __init__(self, impurity_metric='log_score'):
+        self._impurity_func = _supported_impurity_metrics[impurity_metric]
+
+    @staticmethod
+    def estimate(target):
+        mu, sigma, xi = _pwm_estimate(target)
+        params = np.stack([mu, sigma, xi], axis=0)[..., np.newaxis]
+        return params
+
+    def impurity(self, target, params):
+        return self._impurity_func(target, params)
