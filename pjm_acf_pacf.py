@@ -36,9 +36,6 @@ def save_plot_data(target):
     })
     plot_data.to_csv('pjm_acf_pacf.csv', index_label='Index')
 
-    sort = plot_data['pacf'].argsort()
-    sort[sort >= 36].to_csv('sort.csv')
-
 
 def main():
     target = load_target()
