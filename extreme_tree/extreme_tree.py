@@ -1,4 +1,3 @@
-from collections import deque
 from operator import attrgetter
 
 import numpy as np
@@ -93,17 +92,17 @@ class _TreeNode:
 class ExtremeTree:
     __slots__ = (
         '_min_partition_size',
-        '_min_impurity_drop',
+        '_min_impurity_drop_ratio',
         '_max_n_splits',
         '_distribution',
         '_tree',
     )
 
     def __init__(self, distribution=GenExtreme(), max_n_splits=20, min_partition_size=5,
-                 min_impurity_drop=0.0):
+                 min_impurity_drop_ratio=0.0):
         self._min_partition_size = min_partition_size
         self._max_n_splits = max_n_splits
-        self._min_impurity_drop = min_impurity_drop
+        self._min_impurity_drop_ratio = min_impurity_drop_ratio
         self._distribution = distribution
         self._tree = None
 
@@ -113,24 +112,24 @@ class ExtremeTree:
 
     def _build_tree(self, feature, target):
         self._tree = BinaryTree()
-        splitting_queue = deque()
 
         root_node = _TreeNode(_Partition(feature, target))
         self._tree.add_node(root_node)
-        splitting_queue.append(root_node)
+
+        root_node.find_optimal_rule(
+            min_partition_size=self._min_partition_size,
+            distribution=self._distribution
+        )
+
+        min_impurity_drop = root_node.impurity_drop * self._min_impurity_drop_ratio
 
         for _ in tqdm(range(self._max_n_splits), desc='Split', leave=False):
-            while splitting_queue:
-                node = splitting_queue.popleft()
-                node.find_optimal_rule(min_partition_size=self._min_partition_size,
-                                       distribution=self._distribution)
-
             leaf = max(self._tree.leaves, key=attrgetter('impurity_drop'), default=None)
 
             if leaf is None:
                 break
 
-            if not leaf.impurity_drop > self._min_impurity_drop:
+            if not leaf.impurity_drop > min_impurity_drop:
                 break
 
             left_part, right_part = leaf.partition.split(leaf.feature_id, leaf.threshold)
@@ -138,11 +137,17 @@ class ExtremeTree:
             left_child = _TreeNode(left_part)
             right_child = _TreeNode(right_part)
 
+            left_child.find_optimal_rule(
+                min_partition_size=self._min_partition_size,
+                distribution=self._distribution
+            )
+            right_child.find_optimal_rule(
+                min_partition_size=self._min_partition_size,
+                distribution=self._distribution
+            )
+
             self._tree.add_node(left_child, parent=leaf, is_left=True)
             self._tree.add_node(right_child, parent=leaf, is_left=False)
-
-            splitting_queue.append(left_child)
-            splitting_queue.append(right_child)
 
     def _forward_prop(self, feature):
         n_features, n_samples = feature.shape
