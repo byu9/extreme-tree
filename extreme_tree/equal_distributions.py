@@ -23,10 +23,10 @@ def kolmogorov_smirnov(sample1, sample2):
     cdf_v2, cdf_p2 = empirical_cdf(sample2)
 
     cdf_v = np.unique(np.concat([cdf_v1, cdf_v2]))
-    ecdf_vert1 = np.interp(cdf_v, cdf_v1, cdf_p1)
-    ecdf_vert2 = np.interp(cdf_v, cdf_v2, cdf_p2)
+    cdf_p1 = cdf_p1[np.searchsorted(cdf_v1, cdf_v, side='right') - 1]
+    cdf_p2 = cdf_p2[np.searchsorted(cdf_v2, cdf_v, side='right') - 1]
 
-    statistic = np.abs(ecdf_vert1 - ecdf_vert2).max()
+    statistic = np.abs(cdf_p1 - cdf_p2).max()
     return statistic
 
 
