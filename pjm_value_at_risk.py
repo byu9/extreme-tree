@@ -44,9 +44,9 @@ def main():
     generation = read_generation()
 
     plt.figure()
-    plt.plot(target, label='Peak Target')
-    plt.plot(generation, label='PJM Generation')
-    plt.plot(target.index, value_at_risk, label='VaR')
+    plt.step(target.index, target, label='Peak Target')
+    plt.step(generation.index, generation, label='PJM Generation')
+    plt.step(target.index, value_at_risk, label='VaR')
     plt.legend()
     plt.show()
 
