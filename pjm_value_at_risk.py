@@ -30,7 +30,7 @@ def read_generation():
 
 
 def compute_value_at_risk(predict_dist, risk=11.415e-6):
-    value_at_risk = predict_dist.ppf(1 - risk)
+    value_at_risk = predict_dist.isf(risk)
     return value_at_risk
 
 
