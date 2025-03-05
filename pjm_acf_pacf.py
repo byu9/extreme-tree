@@ -5,13 +5,15 @@ from matplotlib import pyplot as plt
 from statsmodels.graphics.tsaplots import plot_acf
 from statsmodels.graphics.tsaplots import plot_pacf
 
-n_lags = 30
+n_lags = 200
 alpha = 0.05
 
 
 def read_target():
-    dataset = pd.read_csv('datasets/pjm/forecasting.csv', index_col=0, parse_dates=True)
-    dataset = dataset.resample('1d').ffill()
+    dataset = pd.read_csv('datasets/pjm/load.csv', index_col=0)
+    dataset.index = pd.to_datetime(dataset.index, utc=True)
+
+    dataset = dataset.resample('1h').ffill()
     dataset = dataset[dataset.index < '2024']
 
     target = dataset['MW']

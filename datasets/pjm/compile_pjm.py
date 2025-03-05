@@ -1,4 +1,5 @@
 import pandas as pd
+from scipy.stats import norm
 
 
 def to_datetime(arr):
@@ -78,7 +79,7 @@ def compile_temperature():
     ]
     temperature = compile_fragments(temperature_files, read_func=read_temperature)
     temperature = temperature.drop(columns=['Zone', 'Kind']).groupby(['Time']).mean()
-    temperature = temperature.resample('1h').ffill()
+    temperature = temperature.resample('1d').ffill()
     return temperature
 
 
@@ -98,24 +99,25 @@ def compile_datasets():
     float_format = '%.1f'
 
     temperature = compile_temperature()
-
     generation = compile_generation()
-    generation = generation.resample('1d').max()
-    generation.to_csv('generation.csv', float_format=float_format)
 
     load = compile_load()
-    load.to_csv('load.csv', float_format=float_format)
+    noise = norm.rvs(size=len(load), loc=0, scale=load['MW'] / 150e3 * 1e3)
+    load['MW'] += noise
 
-    load_daily_max = load.resample('1d').max()
-    shifted_max = load_daily_max.shift([2, 3, 6, 8, 13, 22])
+    load_hourly_max = load.resample('1h').max()
+    shifted_max = load_hourly_max.shift([169, 146, 170, 145, 73, 74])
 
-    forecasting = load_daily_max.join([shifted_max, temperature], sort=True).ffill()
+    forecasting = load_hourly_max.join([shifted_max, temperature], sort=True).ffill()
     forecasting.dropna(inplace=True, axis='index')
     forecasting['Day'] = forecasting.index.day
     forecasting['DoW'] = forecasting.index.dayofweek
     forecasting['Month'] = forecasting.index.month
-    forecasting.index = forecasting.index.tz_localize(None)
+    forecasting['Hour'] = forecasting.index.hour
+
     forecasting.to_csv('forecasting.csv', float_format=float_format)
+    generation.to_csv('generation.csv', float_format=float_format)
+    load.to_csv('load.csv', float_format=float_format)
 
 
 compile_datasets()

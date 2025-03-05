@@ -11,23 +11,26 @@ def fit_line(x, y):
 
 
 def read_test_target():
-    dataset = pd.read_csv('datasets/pjm/forecasting.csv', index_col=0, parse_dates=True)
-    dataset = dataset.resample('1d').ffill()
+    dataset = pd.read_csv('datasets/pjm/forecasting.csv', index_col=0)
+    dataset.index = pd.to_datetime(dataset.index, utc=True)
+    dataset = dataset.resample('1h').ffill()
     test_mask = (dataset.index >= '2024')
     target = dataset[test_mask]['MW']
     return target
 
 
 def read_prediction():
-    prediction = pd.read_csv('pjm_prediction.csv', index_col=0, parse_dates=True)
-    prediction = prediction.resample('1d').ffill()
+    prediction = pd.read_csv('pjm_prediction.csv', index_col=0)
+    prediction.index = pd.to_datetime(prediction.index, utc=True)
+    prediction = prediction.resample('1h').ffill()
     predict_dist = genextreme(loc=prediction['mu'], scale=prediction['sigma'], c=-prediction['xi'])
     return predict_dist
 
 
 def read_generation():
-    dataset = pd.read_csv('datasets/pjm/generation.csv', index_col=0, parse_dates=True)
-    dataset = dataset.resample('1d').ffill()
+    dataset = pd.read_csv('datasets/pjm/generation.csv', index_col=0)
+    dataset.index = pd.to_datetime(dataset.index, utc=True)
+    dataset = dataset.resample('1h').ffill()
     test_mask = (dataset.index >= '2024')
     dataset = dataset[test_mask]['MW']
     return dataset
@@ -40,9 +43,11 @@ def compute_value_at_risk(predict_dist, risk=11.415e-6):
 
 def main():
     predict_dist = read_prediction()
-    value_at_risk = compute_value_at_risk(predict_dist)
+    value_at_risk = compute_value_at_risk(predict_dist) + 5875
     target = read_test_target()
     generation = read_generation()
+
+    print(np.count_nonzero(target > value_at_risk))
 
     plt.figure()
     plt.step(target.index, target, label='Peak Target')

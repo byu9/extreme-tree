@@ -20,8 +20,9 @@ def fit_line(x, y):
 
 
 def read_test_target():
-    dataset = pd.read_csv('datasets/pjm/forecasting.csv', index_col=0, parse_dates=True)
-    dataset = dataset.resample('1d').ffill()
+    dataset = pd.read_csv('datasets/pjm/forecasting.csv', index_col=0)
+    dataset.index = pd.to_datetime(dataset.index, utc=True)
+    dataset = dataset.resample('1h').ffill()
     test_mask = (dataset.index >= '2024')
     target = dataset[test_mask]['MW']
     return target
@@ -29,6 +30,7 @@ def read_test_target():
 
 def read_prediction():
     prediction = pd.read_csv('pjm_prediction.csv', index_col=0)
+    prediction.index = pd.to_datetime(prediction.index, utc=True)
     predict_dist = genextreme(loc=prediction['mu'], scale=prediction['sigma'], c=-prediction['xi'])
     return predict_dist
 
