@@ -1,5 +1,4 @@
 import pandas as pd
-from scipy.stats import norm
 
 
 def to_datetime(arr):
@@ -67,7 +66,7 @@ def compile_generation():
         for year in [2020, 2021, 2022, 2023, 2024]
     ]
     generation = compile_fragments(generation_files, read_func=read_generation)
-    generation = generation.resample('1h').mean()
+    generation = generation.resample('1h').ffill()
     generation.index = generation.index.tz_localize(None)
     return generation
 
@@ -91,33 +90,32 @@ def compile_load():
 
     load = compile_fragments(load_files, read_func=read_load)
     load = load.drop(columns='Zone').groupby('Time').sum()
-    load = load.resample('5min').ffill()
-
-    noise = norm(loc=0, scale=load['MW'] / 150e3 * 5e3).rvs(len(load))
-    load['MW'] += noise
-
+    load = load.resample('1h').ffill()
     return load
 
 
 def compile_datasets():
-    generation = compile_generation()
+    float_format = '%.1f'
+
     temperature = compile_temperature()
+
+    generation = compile_generation()
+    generation = generation.resample('1d').max()
+    generation.to_csv('generation.csv', float_format=float_format)
+
     load = compile_load()
+    load.to_csv('load.csv', float_format=float_format)
 
-    generation.to_csv('generation.csv', float_format='%.4f')
-    load.to_csv('load.csv', float_format='%.4f')
+    load_daily_max = load.resample('1d').max()
+    shifted_max = load_daily_max.shift([2, 3, 6, 8, 13, 22])
 
-    load_hourly_max = load.resample('1h').max()
-    shifted_max = load_hourly_max.shift([169, 146, 170, 145, 73, 74, 121, 49, 98, 122]).round(0)
-
-    forecasting = load_hourly_max.join([shifted_max, temperature], sort=True).ffill()
+    forecasting = load_daily_max.join([shifted_max, temperature], sort=True).ffill()
     forecasting.dropna(inplace=True, axis='index')
     forecasting['Day'] = forecasting.index.day
     forecasting['DoW'] = forecasting.index.dayofweek
     forecasting['Month'] = forecasting.index.month
-    forecasting['Hour'] = forecasting.index.hour
     forecasting.index = forecasting.index.tz_localize(None)
-    forecasting.to_csv('forecasting.csv', float_format='%.4f')
+    forecasting.to_csv('forecasting.csv', float_format=float_format)
 
 
 compile_datasets()

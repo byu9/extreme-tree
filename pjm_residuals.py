@@ -1,10 +1,16 @@
 import numpy as np
 import pandas as pd
+import statsmodels.api as sm
 from matplotlib import pyplot as plt
 from scipy.stats import genextreme
 from scipy.stats import norm
+from statsmodels.graphics.tsaplots import plot_acf
+from statsmodels.graphics.tsaplots import plot_pacf
 
 from extreme_tree.equal_distributions import empirical_cdf
+
+n_lags = 30
+alpha = 0.05
 
 
 def fit_line(x, y):
@@ -14,6 +20,7 @@ def fit_line(x, y):
 
 def read_test_target():
     dataset = pd.read_csv('datasets/pjm/forecasting.csv', index_col=0, parse_dates=True)
+    dataset = dataset.resample('1d').ffill()
     test_mask = (dataset.index >= '2024')
     target = dataset[test_mask]['MW']
     return target
@@ -52,6 +59,28 @@ def eval_residual_hist(residuals):
     plt.title('Residual Histogram')
 
 
+def make_acf_pacf_plots(residual):
+    plot_acf(residual, lags=n_lags, alpha=alpha)
+    plt.grid()
+    plot_pacf(residual, lags=n_lags, alpha=alpha)
+    plt.grid()
+
+
+def save_acf_pacf_plot(residual):
+    acf_vals, acf_ci = sm.tsa.acf(residual, nlags=n_lags, alpha=alpha)
+    pacf_vals, pacf_ci = sm.tsa.pacf(residual, nlags=n_lags, alpha=alpha)
+
+    plot_data = pd.DataFrame({
+        'acf': acf_vals,
+        'pacf': pacf_vals,
+        'ci_acf_upper': acf_ci[:, 0],
+        'ci_acf_lower': acf_ci[:, 1],
+        'ci_pacf_upper': pacf_ci[:, 0],
+        'ci_pacf_lower': pacf_ci[:, 1],
+    })
+    plot_data.to_csv('pjm_residual_acf_pacf.csv', index_label='Index')
+
+
 def main():
     prediction = read_prediction()
     target = read_test_target()
@@ -70,6 +99,10 @@ def main():
 
     eval_residual_qq(residuals)
     eval_residual_hist(residuals)
+
+    make_acf_pacf_plots(residuals)
+    save_acf_pacf_plot(residuals)
+
     plt.show()
 
 

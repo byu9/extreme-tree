@@ -6,6 +6,8 @@ from extreme_tree import ExtremeForest
 
 def load_dataset():
     dataset = pd.read_csv('datasets/pjm/forecasting.csv', index_col=0, parse_dates=True)
+    dataset = dataset.resample('1d').ffill()
+
     feature = dataset.drop(columns='MW')
     target = dataset[['MW']]
 
@@ -21,7 +23,7 @@ def load_dataset():
 def main():
     (train_feature, train_target), (test_feature, test_target) = load_dataset()
 
-    model = ExtremeForest(ensemble_size=30, resample_ratio=0.8)
+    model = ExtremeForest(ensemble_size=30, resample_ratio=0.9, min_partition_size=5)
     model.fit(train_feature, train_target)
     mu, sigma, xi = model.predict(test_feature)
 

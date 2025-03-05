@@ -4,14 +4,16 @@ from matplotlib import pyplot as plt
 from statsmodels.graphics.tsaplots import plot_acf
 from statsmodels.graphics.tsaplots import plot_pacf
 
-n_lags = 200
+n_lags = 30
 alpha = 0.05
 
 
-def load_target():
+def read_target():
     dataset = pd.read_csv('datasets/pjm/forecasting.csv', index_col=0, parse_dates=True)
+    dataset = dataset.resample('1d').ffill()
     dataset = dataset[dataset.index < '2024']
-    target = dataset.resample('1h')['MW'].mean().ffill().to_numpy()
+
+    target = dataset['MW']
     return target
 
 
@@ -38,7 +40,7 @@ def save_plot_data(target):
 
 
 def main():
-    target = load_target()
+    target = read_target()
     save_plot_data(target)
     make_plots(target)
     plt.show()
