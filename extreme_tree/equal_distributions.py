@@ -3,6 +3,13 @@ import numpy as np
 from .validation import ensure_size_at_least
 
 
+def rank_values(values, against):
+    left = np.searchsorted(against, values, side='left')
+    right = np.searchsorted(against, values, side='right')
+    mid_rank = (left + 1 + right) / 2
+    return mid_rank
+
+
 def empirical_cdf(population):
     population = np.ravel(population)
     cdf_v, counts = np.unique(population, return_counts=True)
@@ -10,12 +17,30 @@ def empirical_cdf(population):
     return cdf_v, cdf_p
 
 
-def empirical_p_values(values, population):
-    values = np.reshape(values, shape=(-1, 1))
-    cdf_v, cdf_p = empirical_cdf(population)
-    p_values = np.interp(values, cdf_v, cdf_p, left=0, right=1)
+def cramer_von_mises(sample1, sample2):
+    sample1 = np.ravel(sample1)
+    sample2 = np.ravel(sample2)
+    ensure_size_at_least(sample1, 1)
+    ensure_size_at_least(sample2, 1)
 
-    return p_values
+    values1 = np.sort(sample1)
+    values2 = np.sort(sample2)
+    combined = np.sort(np.concat([values1, values2]))
+
+    n = len(values1)
+    m = len(values2)
+    i = 1 + np.arange(n)
+    j = 1 + np.arange(m)
+
+    mn = m * n
+    m_plus_n = m + n
+
+    r = rank_values(values1, against=combined)
+    s = rank_values(values2, against=combined)
+    u = np.square(r - i).mean() + np.square(s - j).mean()
+    t = u / mn / m_plus_n - (4 * mn - 1) / 6 / m_plus_n
+
+    return t
 
 
 def kolmogorov_smirnov(sample1, sample2):
@@ -45,38 +70,12 @@ def anderson_darling(sample1, sample2):
     values1 = np.unique(sample1)
     values2 = np.unique(sample2)
 
-    z = np.sort(np.concat([sample1, sample2])).reshape(-1, 1)
-    m1 = np.searchsorted(values1, z, side='right')[:-1].reshape(-1)
-    m2 = np.searchsorted(values2, z, side='right')[:-1].reshape(-1)
+    z = np.sort(np.concat([sample1, sample2]))[..., np.newaxis]
+    m1 = np.searchsorted(values1, z, side='right')[:-1].ravel()
+    m2 = np.searchsorted(values2, z, side='right')[:-1].ravel()
 
     term1 = np.square(n * m1 - j * n1) / j / (n - j) / n1
     term2 = np.square(n * m2 - j * n2) / j / (n - j) / n2
     statistic = np.sum(term1 + term2) / n
-
-    return statistic
-
-
-def anderson_darling_k(samples):
-    samples = [np.ravel(sample) for sample in samples]
-
-    for sample in samples:
-        ensure_size_at_least(sample, min_size=2)
-
-    n_k_list = np.array([len(sample) for sample in samples])
-    n = n_k_list.sum()
-    j = np.arange(1, n)
-
-    values_list = [np.unique(sample) for sample in samples]
-
-    z = np.sort(np.concat(samples)).reshape(-1, 1)
-    m_k_list = [
-        np.searchsorted(values, z, side='right')[:-1].reshape(-1)
-        for values in values_list
-    ]
-
-    statistic = sum(
-        np.sum(np.square(n * m_k - j * n_k) / j / (n - j)) / n_k
-        for m_k, n_k in zip(m_k_list, n_k_list)
-    ) / n
 
     return statistic
