@@ -34,7 +34,8 @@ def _pwm_estimate(target):
     b1 = np.sum(num1) / den1
     b2 = np.sum(num2) / den2
 
-    c = (2 * b1 - b0) / (3 * b2 - b0) - np.log(2) / np.log(3)
+    with np.errstate(divide='ignore'):
+        c = (2 * b1 - b0) / (3 * b2 - b0) - np.log(2) / np.log(3)
 
     xi = -7.8590 * c - 2.9554 * c ** 2
     gamma_term = gamma(1 - xi)
