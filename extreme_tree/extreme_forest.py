@@ -1,5 +1,6 @@
+from multiprocessing.pool import Pool
+
 import numpy as np
-from tqdm.auto import tqdm
 
 from .extreme_tree import ExtremeTree
 from .validation import validate_feature
@@ -14,10 +15,10 @@ class ExtremeForest:
     )
 
     def __init__(self, ensemble_size=100, resample_ratio=0.5, **weak_args):
-        self._ensemble = tqdm([
+        self._ensemble = [
             ExtremeTree(**weak_args)
             for _ in range(ensemble_size)
-        ], desc='Ensemble', leave=False)
+        ]
         self._resample_ratio = resample_ratio
         self._random_gen = np.random.default_rng()
 
