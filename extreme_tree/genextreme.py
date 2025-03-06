@@ -58,7 +58,7 @@ def _pwm_estimate(target):
     b1 = np.sum(num1) / den1
     b2 = np.sum(num2) / den2
 
-    with np.errstate(divide='ignore'):
+    with np.errstate(divide='ignore', invalid='ignore'):
         c = (2 * b1 - b0) / (3 * b2 - b0) - np.log(2) / np.log(3)
 
     xi = -7.8590 * c - 2.9554 * c ** 2
@@ -66,6 +66,7 @@ def _pwm_estimate(target):
     sigma = (b0 - 2 * b1) * xi / gamma_term / (1 - 2 ** xi)
     mu = b0 - sigma / xi * (gamma_term - 1)
 
+    sigma = np.nan_to_num(sigma, nan=0).clip(min=1e-3)
     return mu, sigma, xi
 
 
