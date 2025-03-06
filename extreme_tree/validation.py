@@ -25,10 +25,7 @@ def validate_target(target):
         target = target.to_numpy()
 
     else:
-        target = np.atleast_2d(target)
-
-    if not target.ndim == 2:
-        raise ValueError('Target must be 2D having (n_samples, 1).')
+        target = np.ravel(target)
 
     return target
 
