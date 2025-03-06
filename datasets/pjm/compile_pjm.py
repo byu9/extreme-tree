@@ -119,13 +119,15 @@ def compile_datasets():
     temperature = compile_temperature()
     temperature = temperature.resample('1h').ffill()
 
-    training = build_dataset(load=peak_load, lagged_load=lagged_peak, temperature=temperature)
+    peak_dataset = build_dataset(load=peak_load, lagged_load=lagged_peak, temperature=temperature)
     testing = build_dataset(load=load, lagged_load=lagged_load, temperature=temperature)
 
-    training = training[training.index < '2024']
+    training = peak_dataset[peak_dataset.index < '2024']
+    validating = peak_dataset[peak_dataset.index >= '2024']
     testing = testing[testing.index >= '2024']
 
     training.to_csv('training.csv', float_format=float_format)
+    validating.to_csv('validating.csv', float_format=float_format)
     testing.to_csv('testing.csv', float_format=float_format)
 
     generation.to_csv('generation.csv', float_format=float_format)

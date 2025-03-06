@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 import numpy as np
+import pandas as pd
 from matplotlib import pyplot as plt
+from scipy.stats import norm
 
+from extreme_tree.equal_distributions import empirical_cdf
 from pjm import read_generation
 from pjm import read_prediction_extended
 from pjm import read_testing
@@ -40,6 +43,35 @@ def plot_value_at_risk(prediction, generation, target):
     plt.legend()
 
 
+def plot_histogram(sample, save_as):
+    height, edges = np.histogram(sample, bins=30)
+    centers = (edges[1:] + edges[:-1]) / 2
+
+    histogram_data = pd.DataFrame({'height': height, 'center': centers})
+    histogram_data.set_index('center', inplace=True, drop=True)
+    histogram_data.to_csv(save_as)
+
+    plt.figure()
+    plt.stem(centers, height)
+    plt.title('Histogram')
+
+
+def plot_quantile_quantile(sample, save_as):
+    sample_dist = norm(loc=sample.mean(), scale=sample.std())
+    quantiles, probabilities = empirical_cdf(sample)
+    theoretical_quantiles = sample_dist.ppf(probabilities)
+
+    report = pd.DataFrame({'theoretical': theoretical_quantiles, 'actual': quantiles})
+    report.to_csv(save_as, index_label='Index')
+
+    plt.figure()
+    plt.scatter(theoretical_quantiles, quantiles)
+    plt.axline((0, 0), (1, 1))
+    plt.xlabel('theoretical')
+    plt.ylabel('actual')
+    plt.title('Quantile-Quantile')
+
+
 def main():
     _, target = read_testing()
     prediction = read_prediction_extended()
@@ -52,6 +84,8 @@ def main():
 
     plot_prediction(prediction, target)
     plot_value_at_risk(prediction, generation, target)
+    plot_histogram(residuals, save_as='pjm_residual_histogram.csv')
+    plot_quantile_quantile(residuals, save_as='pjm_residual_qq.csv')
 
     plt.show()
 

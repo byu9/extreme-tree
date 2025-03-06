@@ -5,16 +5,8 @@ from scipy.stats import genextreme
 from extreme_tree import ExtremeForest
 
 
-def read_training():
-    dataset = pd.read_csv('datasets/pjm/training.csv', index_col=0)
-    dataset.index = pd.to_datetime(dataset.index, utc=True)
-    feature = dataset.drop(columns='MW')
-    target = dataset['MW']
-    return feature, target
-
-
-def read_testing():
-    dataset = pd.read_csv('datasets/pjm/testing.csv', index_col=0)
+def read_peak_dataset(filename):
+    dataset = pd.read_csv(filename, index_col=0)
     dataset.index = pd.to_datetime(dataset.index, utc=True)
     feature = dataset.drop(columns='MW')
     target = dataset['MW']
@@ -28,14 +20,14 @@ def read_generation():
     return dataset
 
 
-def read_prediction():
-    prediction = pd.read_csv('pjm_prediction.csv', index_col=0)
+def read_prediction(filename):
+    prediction = pd.read_csv(filename, index_col=0)
     prediction.index = pd.to_datetime(prediction.index, utc=True)
     return prediction
 
 
-def read_prediction_extended():
-    prediction = read_prediction()
+def read_prediction_extended(filename):
+    prediction = read_prediction(filename)
     predict_dist = genextreme(loc=prediction['mu'], scale=prediction['sigma'], c=-prediction['xi'])
 
     extended_data = {
@@ -48,20 +40,24 @@ def read_prediction_extended():
     return extended
 
 
-def write_prediction(index, mu, sigma, xi):
+def write_prediction(filename, model, feature):
+    mu, sigma, xi = model.predict(feature)
     prediction_dict = {'mu': mu.ravel(), 'sigma': sigma.ravel(), 'xi': xi.ravel()}
-    prediction = pd.DataFrame(prediction_dict, index=index)
-    prediction.to_csv('pjm_prediction.csv')
+    prediction = pd.DataFrame(prediction_dict, index=feature.index)
+    prediction.to_csv(filename)
 
 
 def main():
-    train_feature, train_target = read_training()
-    test_feature, test_target = read_testing()
+    train_feature, train_target = read_peak_dataset('datasets/pjm/training.csv')
+    test_feature, test_target = read_peak_dataset('datasets/pjm/testing.csv')
+    validation_feature, validation_target = read_peak_dataset('datasets/pjm/validating.csv')
 
     model = ExtremeForest(ensemble_size=30, resample_ratio=0.9, min_impurity_drop_ratio=0.4)
     model.fit(train_feature, train_target)
-    mu, sigma, xi = model.predict(test_feature)
-    write_prediction(test_feature.index, mu, sigma, xi)
+
+    write_prediction('pjm_test_prediction.csv', model, test_feature)
+    write_prediction('pjm_train_prediction.csv', model, train_feature)
+    write_prediction('pjm_validation_prediction.csv', model, validation_feature)
 
 
 if __name__ == '__main__':
