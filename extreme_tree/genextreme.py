@@ -1,5 +1,7 @@
 import numpy as np
+from scipy.special import expi
 from scipy.special import gamma
+from scipy.special import gammainc
 from scipy.stats import genextreme
 
 
@@ -7,6 +9,28 @@ def _log_score(target, params):
     mu, sigma, xi = params
     score = -genextreme.logpdf(target, loc=mu, scale=sigma, c=-xi)
     score = np.nan_to_num(score, copy=False, nan=0, posinf=0)
+    return score.sum()
+
+
+def _crps_score(y, params):
+    mu, sigma, xi = params
+
+    xi_zero = np.isclose(xi, 0, atol=1e-3)
+    one_over_xi = np.divide(1, xi, where=~xi_zero)
+
+    cdf = genextreme.cdf(y, loc=mu, scale=sigma, c=-xi)
+    logcdf = genextreme.logcdf(y, loc=mu, scale=sigma, c=-xi)
+
+    gamma_term = gamma(1 - xi)
+    gammainc_term = gamma_term * gammainc(1 - xi, -logcdf)
+
+    first_part = (mu - y - sigma * one_over_xi) * (1 - 2 * cdf)
+    second_part = sigma * one_over_xi * (2 ** xi * gamma_term - 2 * gammainc_term)
+    score_nonzero = first_part - second_part
+
+    score_zero = mu - y + sigma * (np.euler_gamma - np.log(2)) - 2 * sigma * expi(logcdf)
+
+    score = np.positive(score_zero, where=xi_zero, out=score_nonzero)
     return score.sum()
 
 
@@ -46,7 +70,8 @@ def _pwm_estimate(target):
 
 
 _supported_impurity_metrics = {
-    'log_score': _log_score
+    'log_score': _log_score,
+    'crps': _crps_score
 }
 
 
