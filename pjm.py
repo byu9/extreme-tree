@@ -58,7 +58,7 @@ def main():
     train_feature, train_target = read_training()
     test_feature, test_target = read_testing()
 
-    model = ExtremeForest(ensemble_size=1, resample_ratio=1, min_partition_size=6)
+    model = ExtremeForest(ensemble_size=30, resample_ratio=0.9, min_impurity_drop_ratio=0.4)
     model.fit(train_feature, train_target)
     mu, sigma, xi = model.predict(test_feature)
     write_prediction(test_feature.index, mu, sigma, xi)
