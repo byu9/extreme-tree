@@ -1,5 +1,4 @@
 import pandas as pd
-from scipy.stats import norm
 
 
 def to_datetime(arr):
@@ -97,23 +96,24 @@ def compile_load():
 
 def compile_datasets():
     float_format = '%.1f'
-
-    temperature = compile_temperature()
     generation = compile_generation()
 
     load = compile_load()
-    noise = norm.rvs(size=len(load), loc=0, scale=load['MW'] / 150e3 * 1e3)
-    load['MW'] += noise
+    lagged_load = load.shift([1, 2, 3, 7, 14], freq='d')
 
-    load_hourly_max = load.resample('1h').max()
-    shifted_max = load_hourly_max.shift([169, 146, 170, 145, 73, 74])
+    peak_times = pd.Index(load.resample('1d')['MW'].idxmax(), name='Peak Time')
+    peak_load = load.loc[peak_times]
+    lagged_towards_peak = lagged_load.reindex(peak_times)
 
-    forecasting = load_hourly_max.join([shifted_max, temperature], sort=True).ffill()
-    forecasting.dropna(inplace=True, axis='index')
+    temperature = compile_temperature()
+    temperature = temperature.resample('1h').ffill().reindex(peak_times)
+
+    forecasting = pd.concat([peak_load, lagged_towards_peak, temperature], axis="columns")
     forecasting['Day'] = forecasting.index.day
     forecasting['DoW'] = forecasting.index.dayofweek
     forecasting['Month'] = forecasting.index.month
     forecasting['Hour'] = forecasting.index.hour
+    forecasting.dropna(inplace=True, axis='index')
 
     forecasting.to_csv('forecasting.csv', float_format=float_format)
     generation.to_csv('generation.csv', float_format=float_format)
