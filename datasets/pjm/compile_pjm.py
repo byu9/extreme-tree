@@ -67,7 +67,6 @@ def compile_generation():
     ]
     generation = compile_fragments(generation_files, read_func=read_generation)
     generation = generation.resample('1h').ffill()
-    generation.index = generation.index.tz_localize(None)
     return generation
 
 
@@ -94,28 +93,41 @@ def compile_load():
     return load
 
 
+def build_dataset(load, lagged_load, temperature):
+    temperature = temperature.reindex(load.index)
+    lagged_load = lagged_load.reindex(load.index)
+    dataset = pd.concat([load, lagged_load, temperature], axis='columns')
+    dataset['Day'] = dataset.index.day
+    dataset['DoW'] = dataset.index.dayofweek
+    dataset['Month'] = dataset.index.month
+    dataset['Hour'] = dataset.index.hour
+    dataset.dropna(inplace=True, axis='index')
+    return dataset
+
+
 def compile_datasets():
-    float_format = '%.1f'
+    float_format = '%.0f'
     generation = compile_generation()
 
     load = compile_load()
-    lagged_load = load.shift([1, 2, 3, 7, 14], freq='d')
+    lagged_load = load.shift([1, 2, 3], freq='h')
 
     peak_times = pd.Index(load.resample('1d')['MW'].idxmax(), name='Peak Time')
     peak_load = load.loc[peak_times]
-    lagged_towards_peak = lagged_load.reindex(peak_times)
+    lagged_peak = lagged_load.reindex(peak_times)
 
     temperature = compile_temperature()
-    temperature = temperature.resample('1h').ffill().reindex(peak_times)
+    temperature = temperature.resample('1h').ffill()
 
-    forecasting = pd.concat([peak_load, lagged_towards_peak, temperature], axis="columns")
-    forecasting['Day'] = forecasting.index.day
-    forecasting['DoW'] = forecasting.index.dayofweek
-    forecasting['Month'] = forecasting.index.month
-    forecasting['Hour'] = forecasting.index.hour
-    forecasting.dropna(inplace=True, axis='index')
+    training = build_dataset(load=peak_load, lagged_load=lagged_peak, temperature=temperature)
+    testing = build_dataset(load=load, lagged_load=lagged_load, temperature=temperature)
 
-    forecasting.to_csv('forecasting.csv', float_format=float_format)
+    training = training[training.index < '2024']
+    testing = testing[testing.index >= '2024']
+
+    training.to_csv('training.csv', float_format=float_format)
+    testing.to_csv('testing.csv', float_format=float_format)
+
     generation.to_csv('generation.csv', float_format=float_format)
     load.to_csv('load.csv', float_format=float_format)
 
