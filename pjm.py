@@ -21,6 +21,13 @@ def read_testing():
     return feature, target
 
 
+def read_generation():
+    dataset = pd.read_csv('datasets/pjm/generation.csv', index_col=0)
+    dataset.index = pd.to_datetime(dataset.index, utc=True)
+    dataset = dataset['MW']
+    return dataset
+
+
 def read_prediction():
     prediction = pd.read_csv('pjm_prediction.csv', index_col=0)
     prediction.index = pd.to_datetime(prediction.index, utc=True)
@@ -35,6 +42,7 @@ def read_prediction_extended():
         'mean': predict_dist.mean().ravel(),
         'lo': predict_dist.ppf(0.05).ravel(),
         'hi': predict_dist.ppf(0.95).ravel(),
+        'VaR': predict_dist.isf(11.415e-6).ravel(),
     }
     extended = pd.DataFrame(extended_data, index=prediction.index)
     return extended
