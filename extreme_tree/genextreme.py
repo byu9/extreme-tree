@@ -6,7 +6,7 @@ from scipy.stats import genextreme
 def _log_score(target, params):
     mu, sigma, xi = params
     score = -genextreme.logpdf(target, loc=mu, scale=sigma, c=-xi)
-    score = np.nan_to_num(score, copy=False, nan=1e4, posinf=1e4)
+    score = np.nan_to_num(score, copy=False, nan=0, posinf=0)
     return score.sum()
 
 
