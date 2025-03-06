@@ -9,25 +9,21 @@ np.random.seed(123)
 
 
 def _create_block_maxima():
-    cluster_sizes = [3000, 2000, 1000]
+    cluster_sizes = [300, 300, 300]
 
-    x1 = np.arange(3000)
-    x2 = np.arange(3000, 5000)
-    x3 = np.arange(5000, 6000)
-
-    y1 = genextreme(loc=1, scale=1, c=0).rvs(cluster_sizes[0])
-    y2 = genextreme(loc=0, scale=1, c=-0.2).rvs(cluster_sizes[1])
+    y1 = genextreme(loc=0, scale=1, c=0).rvs(cluster_sizes[0])
+    y2 = genextreme(loc=0, scale=2, c=0).rvs(cluster_sizes[1])
     y3 = genextreme(loc=0, scale=1, c=0.2).rvs(cluster_sizes[2])
 
-    x = np.concat([x1, x2, x3]).reshape(-1, 1)
     y = np.concat([y1, y2, y3]).reshape(-1, 1)
+    x = np.arange(len(y)).reshape(-1, 1)
 
     return x, y
 
 
 def _fit_predict_once():
     x, y = _create_block_maxima()
-    model = ExtremeForest(ensemble_size=500, resample_ratio=0.05)
+    model = ExtremeForest(ensemble_size=10, resample_ratio=0.8, min_impurity_drop_ratio=0.8)
     model.fit(x, y)
     mu, sigma, xi = model.predict(x)
     return x, y, mu, sigma, xi
