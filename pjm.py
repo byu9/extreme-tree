@@ -7,7 +7,7 @@ from extreme_tree import ExtremeForest
 
 def read_peak_dataset(filename):
     dataset = pd.read_csv(filename, index_col=0)
-    dataset.index = pd.to_datetime(dataset.index, utc=True)
+    dataset.index = pd.to_datetime(dataset.index, utc=True).tz_convert('US/Eastern')
     feature = dataset.drop(columns='MW')
     target = dataset['MW']
     return feature, target
@@ -15,14 +15,14 @@ def read_peak_dataset(filename):
 
 def read_generation():
     dataset = pd.read_csv('datasets/pjm/generation.csv', index_col=0)
-    dataset.index = pd.to_datetime(dataset.index, utc=True)
+    dataset.index = pd.to_datetime(dataset.index, utc=True).tz_convert('US/Eastern')
     dataset = dataset['MW']
     return dataset
 
 
 def read_prediction(filename):
     prediction = pd.read_csv(filename, index_col=0)
-    prediction.index = pd.to_datetime(prediction.index, utc=True)
+    prediction.index = pd.to_datetime(prediction.index, utc=True).tz_convert('US/Eastern')
     return prediction
 
 
