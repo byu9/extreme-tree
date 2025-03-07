@@ -42,6 +42,9 @@ def plot_value_at_risk(prediction, generation, target):
     plt.step(prediction.index, prediction['VaR'], label='VaR')
     plt.legend()
 
+    underforecasted = np.count_nonzero(prediction['VaR'] <= target)
+    print(f'{underforecasted=:}')
+
 
 def plot_histogram(sample, save_as):
     height, edges = np.histogram(sample, bins=30)
