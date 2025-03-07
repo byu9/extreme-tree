@@ -78,11 +78,11 @@ def plot_quantile_quantile(sample, save_as):
 def main():
     _, test_target = read_peak_dataset('datasets/pjm/testing.csv')
     _, train_target = read_peak_dataset('datasets/pjm/training.csv')
-    _, validation_target = read_peak_dataset('datasets/pjm/validating.csv')
+    _, validation_target = read_peak_dataset('datasets/pjm/validation.csv')
 
-    test_prediction = read_prediction_extended('pjm_test_prediction.csv')
-    train_prediction = read_prediction_extended('pjm_train_prediction.csv')
-    validation_prediction = read_prediction_extended('pjm_validation_prediction.csv')
+    test_prediction = read_prediction_extended('testing_prediction.csv')
+    train_prediction = read_prediction_extended('training_prediction.csv')
+    validation_prediction = read_prediction_extended('validation_prediction.csv')
 
     generation = read_generation()
 
@@ -99,11 +99,10 @@ def main():
     calc_residual_mae(validation_residuals, label='validation')
     calc_residual_umae(validation_residuals, label='validation')
 
-    plot_prediction(test_prediction, test_target)
+    plot_histogram(validation_residuals, save_as='pjm_residual_histogram.csv')
+    plot_quantile_quantile(validation_residuals, save_as='pjm_residual_qq.csv')
     plot_value_at_risk(test_prediction, generation, test_target)
-
-    plot_histogram(train_residuals, save_as='pjm_residual_histogram.csv')
-    plot_quantile_quantile(train_residuals, save_as='pjm_residual_qq.csv')
+    plot_prediction(test_prediction, test_target)
 
     plt.show()
 

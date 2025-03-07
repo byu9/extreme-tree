@@ -8,8 +8,8 @@ from extreme_tree import ExtremeForest
 def read_peak_dataset(filename):
     dataset = pd.read_csv(filename, index_col=0)
     dataset.index = pd.to_datetime(dataset.index, utc=True).tz_convert('US/Eastern')
-    feature = dataset.drop(columns='MW')
-    target = dataset['MW']
+    feature = dataset.drop(columns='Error MW')
+    target = dataset['Error MW']
     return feature, target
 
 
@@ -50,14 +50,14 @@ def write_prediction(filename, model, feature):
 def main():
     train_feature, train_target = read_peak_dataset('datasets/pjm/training.csv')
     test_feature, test_target = read_peak_dataset('datasets/pjm/testing.csv')
-    validation_feature, validation_target = read_peak_dataset('datasets/pjm/validating.csv')
+    validation_feature, validation_target = read_peak_dataset('datasets/pjm/validation.csv')
 
-    model = ExtremeForest(ensemble_size=30, resample_ratio=0.9, min_impurity_drop_ratio=0.4)
+    model = ExtremeForest(ensemble_size=100, resample_ratio=0.9, max_n_splits=40, min_impurity_drop_ratio=0.01)
     model.fit(train_feature, train_target)
 
-    write_prediction('pjm_test_prediction.csv', model, test_feature)
-    write_prediction('pjm_train_prediction.csv', model, train_feature)
-    write_prediction('pjm_validation_prediction.csv', model, validation_feature)
+    write_prediction('training_prediction.csv', model, train_feature)
+    write_prediction('testing_prediction.csv', model, test_feature)
+    write_prediction('validation_prediction.csv', model, validation_feature)
 
 
 if __name__ == '__main__':
