@@ -68,10 +68,10 @@ def plot_quantile_quantile(sample, save_as):
     report.to_csv(save_as, index_label='Index')
 
     plt.figure()
-    plt.scatter(theoretical_quantiles, quantiles)
+    plt.scatter(quantiles, theoretical_quantiles)
     plt.axline((0, 0), (1, 1))
-    plt.xlabel('theoretical')
-    plt.ylabel('actual')
+    plt.xlabel('actual')
+    plt.ylabel('theoretical')
     plt.title('Quantile-Quantile')
 
 
