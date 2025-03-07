@@ -128,12 +128,13 @@ def compile_datasets():
 
     load = compile_load().sum(axis='columns', skipna=False).rename('Load MW')
     forecast = compile_load_forecast()['RTO'].rename('Forecast MW')
-    forecast_error = (load - forecast).to_frame(name='Error MW')
+    error = load - forecast
+    underforecasted_error = error[error > 0].to_frame(name='Error MW')
 
     temperature = compile_temperature().ffill().mean(axis='columns').to_frame('Degrees F')
-    temperature = temperature.reindex(forecast_error.index).ffill()
+    temperature = temperature.reindex(underforecasted_error.index).ffill()
 
-    dataset = pd.concat([forecast_error, temperature], axis='columns')
+    dataset = pd.concat([underforecasted_error, temperature], axis='columns')
     dataset['Day'] = dataset.index.day
     dataset['DoW'] = dataset.index.dayofweek
     dataset['Month'] = dataset.index.month
