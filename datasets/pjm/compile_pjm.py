@@ -67,6 +67,7 @@ def compile_generation():
     ]
     generation = compile_fragments(generation_files, read_func=read_generation)
     generation = generation.resample('1h').ffill()
+    generation.dropna(inplace=True, axis='index')
     return generation
 
 
@@ -88,8 +89,10 @@ def compile_load():
     ]
 
     load = compile_fragments(load_files, read_func=read_load)
-    load = load.drop(columns='Zone').groupby('Time').sum()
+    load = pd.pivot(load, columns='Zone', values='MW')
     load = load.resample('1h').ffill()
+    load = load.sum(axis='columns', skipna=False).to_frame(name='MW')
+    load.dropna(inplace=True, axis='index')
     return load
 
 
