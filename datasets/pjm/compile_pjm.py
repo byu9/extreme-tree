@@ -125,13 +125,14 @@ def compile_datasets():
     training = peak_dataset[peak_dataset.index < '2024']
     validating = peak_dataset[peak_dataset.index >= '2024']
     testing = testing[testing.index >= '2024']
+    correlation_study = load[load.index < '2024']
 
     training.to_csv('training.csv', float_format=float_format)
     validating.to_csv('validating.csv', float_format=float_format)
     testing.to_csv('testing.csv', float_format=float_format)
 
     generation.to_csv('generation.csv', float_format=float_format)
-    load.to_csv('load.csv', float_format=float_format)
+    correlation_study.to_csv('correlation_study.csv', float_format=float_format)
 
 
 compile_datasets()
