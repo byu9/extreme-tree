@@ -3,8 +3,8 @@ from scipy.stats import genpareto
 
 
 def _log_score(target, params):
-    mu, sigma, xi = params
-    score = -genpareto.logpdf(target, scale=sigma, c=-xi)
+    sigma, xi = params
+    score = -genpareto.logpdf(target, scale=sigma, c=xi)
     score = np.nan_to_num(score, copy=False, nan=0, posinf=0)
     return score.sum()
 
