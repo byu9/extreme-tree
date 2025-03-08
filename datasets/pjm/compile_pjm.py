@@ -133,7 +133,7 @@ def compile_datasets():
     temperature = compile_temperature().ffill().mean(axis='columns').to_frame('Degrees F')
     temperature = temperature.reindex(error.index).ffill()
 
-    dataset = pd.concat([error, temperature], axis='columns')
+    dataset = pd.concat([error, forecast, temperature], axis='columns')
     dataset['Day'] = dataset.index.day
     dataset['DoW'] = dataset.index.dayofweek
     dataset['Month'] = dataset.index.month
