@@ -9,145 +9,114 @@ from .validation import validate_feature
 from .validation import validate_feature_target
 
 
-class _Partition:
+class _TreeNode:
     __slots__ = (
         'feature',
         'target',
+
+        'feature_id',
+        'threshold',
+        'score',
+
+        'prediction',
+        'pi',
     )
 
     def __init__(self, feature, target):
         self.feature = feature
         self.target = target
 
-    def split(self, feature_id, threshold):
-        split_mask = self.feature[feature_id] <= threshold
-        left_part = _Partition(self.feature[:, split_mask], self.target[split_mask])
-        right_part = _Partition(self.feature[:, ~split_mask], self.target[~split_mask])
-        return left_part, right_part
+        self.pi = None
 
-    def splitting_rules(self, min_partition_size):
+        self.score = None
+        self.feature_id = None
+        self.threshold = None
+        self.prediction = None
+
+    def _splitting_rules(self, min_partition_size, score_func):
         n_features, n_samples = self.feature.shape
 
         for feature_id in tqdm(range(n_features), desc='Feature', leave=False):
             sort_indices = self.feature[feature_id].argsort()
-            sort_feature = self.feature[:, sort_indices]
-            sort_target = self.target[sort_indices]
+            feature_vals = self.feature[feature_id, sort_indices]
+            target_vals = self.target[sort_indices]
 
-            unique_values = np.unique(sort_feature[feature_id])
+            unique_values = np.unique(feature_vals)
             midpoints = (unique_values[:-1] + unique_values[1:]) / 2
 
             for threshold in tqdm(midpoints, desc='Threshold', leave=False):
-                split_index = np.searchsorted(sort_feature[feature_id], threshold, side='right')
+                split_index = np.searchsorted(feature_vals, threshold, side='right')
 
                 if min_partition_size <= split_index <= n_samples - min_partition_size:
-                    left_target = sort_target[:split_index]
-                    right_target = sort_target[split_index:]
+                    left_target_vals = target_vals[:split_index]
+                    right_target_vals = target_vals[split_index:]
+                    score = score_func(target_vals, left_target_vals, right_target_vals)
+                    yield score, feature_id, threshold
 
-                    yield feature_id, threshold, left_target, right_target
+    def find_optimal_rule(self, min_score, **kwargs):
+        rules = list(self._splitting_rules(**kwargs))
 
+        if rules:
+            scores, feature_ids, thresholds = zip(*rules)
+            best_index = max(range(len(scores)), key=scores.__getitem__)
 
-class _TreeNode:
-    __slots__ = (
-        'partition',
+            if scores[best_index] > min_score:
+                self.score = scores[best_index]
+                self.feature_id = feature_ids[best_index]
+                self.threshold = thresholds[best_index]
 
-        'feature_id',
-        'threshold',
-        'impurity_drop',
-
-        'prediction',
-        'impurity',
-        'pi',
-    )
-
-    def __init__(self, partition):
-        self.partition = partition
-        self.pi = None
-
-        self.impurity_drop = -np.inf
-        self.feature_id = None
-        self.threshold = None
-        self.prediction = None
-        self.impurity = None
-
-    def find_optimal_rule(self, min_partition_size, distribution):
-        self.prediction = distribution.estimate(self.partition.target)
-        self.impurity = distribution.impurity(self.partition.target, params=self.prediction)
-        rules = self.partition.splitting_rules(min_partition_size=min_partition_size)
-
-        for feature_id, threshold, left_target, right_target in rules:
-
-            left_params = distribution.estimate(left_target)
-            right_params = distribution.estimate(right_target)
-
-            left_impurity = distribution.impurity(left_target, params=left_params)
-            right_impurity = distribution.impurity(right_target, params=right_params)
-            impurity_drop = self.impurity - left_impurity - right_impurity
-
-            if impurity_drop > self.impurity_drop:
-                self.impurity_drop = impurity_drop
-                self.feature_id = feature_id
-                self.threshold = threshold
+    def split(self):
+        split_mask = self.feature[self.feature_id] <= self.threshold
+        left = _TreeNode(self.feature[:, split_mask], self.target[split_mask])
+        right = _TreeNode(self.feature[:, ~split_mask], self.target[~split_mask])
+        return left, right
 
 
 class ExtremeTree:
     __slots__ = (
-        '_min_partition_size',
-        '_min_impurity_drop_ratio',
         '_max_n_splits',
         '_distribution',
+        '_find_rule_params',
         '_tree',
     )
 
-    def __init__(self, distribution=GenExtreme(), max_n_splits=20, min_partition_size=5,
-                 min_impurity_drop_ratio=0.0):
-        self._min_partition_size = min_partition_size
+    def __init__(self, distribution=GenExtreme(), max_n_splits=40, min_partition_size=5,
+                 min_score=-np.inf):
         self._max_n_splits = max_n_splits
-        self._min_impurity_drop_ratio = min_impurity_drop_ratio
         self._distribution = distribution
         self._tree = None
+        self._find_rule_params = {
+            'min_partition_size': min_partition_size,
+            'score_func': distribution.score_func,
+            'min_score': min_score
+        }
 
     def _ensure_fitted(self):
         if self._tree is None:
             raise RuntimeError('Model is not fitted.')
 
     def _build_tree(self, feature, target):
+        root_node = _TreeNode(feature, target)
+        root_node.find_optimal_rule(**self._find_rule_params)
         self._tree = BinaryTree()
-
-        root_node = _TreeNode(_Partition(feature, target))
         self._tree.add_node(root_node)
 
-        root_node.find_optimal_rule(
-            min_partition_size=self._min_partition_size,
-            distribution=self._distribution
-        )
-
-        min_impurity_drop = root_node.impurity_drop * self._min_impurity_drop_ratio
-
         for _ in tqdm(range(self._max_n_splits), desc='Split', leave=False):
-            leaf = max(self._tree.leaves, key=attrgetter('impurity_drop'), default=None)
 
-            if leaf is None:
+            candidate_leaves = [leaf for leaf in self._tree.leaves if leaf.score is not None]
+            if not candidate_leaves:
                 break
 
-            if not leaf.impurity_drop > min_impurity_drop:
-                break
+            leaf = max(candidate_leaves, key=attrgetter('score'))
+            left, right = leaf.split()
+            left.find_optimal_rule(**self._find_rule_params)
+            right.find_optimal_rule(**self._find_rule_params)
 
-            left_part, right_part = leaf.partition.split(leaf.feature_id, leaf.threshold)
+            self._tree.add_node(left, parent=leaf, is_left=True)
+            self._tree.add_node(right, parent=leaf, is_left=False)
 
-            left_child = _TreeNode(left_part)
-            right_child = _TreeNode(right_part)
-
-            left_child.find_optimal_rule(
-                min_partition_size=self._min_partition_size,
-                distribution=self._distribution
-            )
-            right_child.find_optimal_rule(
-                min_partition_size=self._min_partition_size,
-                distribution=self._distribution
-            )
-
-            self._tree.add_node(left_child, parent=leaf, is_left=True)
-            self._tree.add_node(right_child, parent=leaf, is_left=False)
+        for leaf in self._tree.leaves:
+            leaf.prediction = self._distribution.estimate(leaf.target)
 
     def _forward_prop(self, feature):
         n_features, n_samples = feature.shape
