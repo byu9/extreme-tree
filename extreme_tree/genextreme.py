@@ -4,12 +4,22 @@ from scipy.special import gamma
 from scipy.special import gammainc
 from scipy.stats import genextreme
 
+from extreme_tree.equal_distributions import empirical_cdf
+
 
 def _log_score(target, params):
     mu, sigma, xi = params
     score = -genextreme.logpdf(target, loc=mu, scale=sigma, c=-xi)
     score = np.nan_to_num(score, copy=False, nan=0, posinf=0)
     return score.sum()
+
+
+def _kolmogorov_smirnov(target, params):
+    mu, sigma, xi = params
+    empirical_values, empirical_quantiles = empirical_cdf(target)
+    theoretical_quantiles = genextreme.cdf(empirical_values, loc=mu, scale=sigma, c=-xi)
+    statistic = np.max(abs(empirical_quantiles - theoretical_quantiles))
+    return statistic
 
 
 def _crps_score(y, params):
@@ -90,5 +100,10 @@ class GenExtreme:
         params = np.stack([mu, sigma, xi], axis=0)[..., np.newaxis]
         return params
 
-    def impurity(self, target, params):
-        return self._impurity_func(target, params)
+    @staticmethod
+    def score_func(parent, left, right):
+        parent_score = _kolmogorov_smirnov(parent, GenExtreme.estimate(parent))
+        left_score = _kolmogorov_smirnov(left, GenExtreme.estimate(left))
+        right_score = _kolmogorov_smirnov(right, GenExtreme.estimate(right))
+
+        return parent_score - left_score - right_score
