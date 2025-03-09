@@ -102,8 +102,8 @@ class GenExtreme:
 
     @staticmethod
     def score_func(parent, left, right):
-        parent_score = _kolmogorov_smirnov(parent, GenExtreme.estimate(parent))
-        left_score = _kolmogorov_smirnov(left, GenExtreme.estimate(left))
-        right_score = _kolmogorov_smirnov(right, GenExtreme.estimate(right))
+        parent_score = _crps_score(parent, GenExtreme.estimate(parent))
+        left_score = _crps_score(left, GenExtreme.estimate(left))
+        right_score = _crps_score(right, GenExtreme.estimate(right))
 
-        return parent_score - left_score - right_score
+        return (parent_score - left_score - right_score) / len(parent)
