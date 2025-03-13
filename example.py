@@ -151,12 +151,12 @@ def _get_param_bounds(x, dist):
 
     report = pd.DataFrame({
         'x': x.ravel(),
-        'mu_lo': mu_dist.ppf(0.1).ravel(),
-        'mu_hi': mu_dist.ppf(0.9).ravel(),
-        'sigma_lo': sigma_dist.ppf(0.1).ravel(),
-        'sigma_hi': sigma_dist.ppf(0.9).ravel(),
-        'xi_lo': xi_dist.ppf(0.1).ravel(),
-        'xi_hi': xi_dist.ppf(0.9).ravel(),
+        'mu_lo': mu_dist.ppf(0.05).ravel(),
+        'mu_hi': mu_dist.ppf(0.95).ravel(),
+        'sigma_lo': sigma_dist.ppf(0.05).ravel(),
+        'sigma_hi': sigma_dist.ppf(0.95).ravel(),
+        'xi_lo': xi_dist.ppf(0.05).ravel(),
+        'xi_hi': xi_dist.ppf(0.95).ravel(),
     })
     return report
 
