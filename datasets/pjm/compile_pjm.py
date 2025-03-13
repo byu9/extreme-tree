@@ -133,14 +133,14 @@ def compile_datasets():
     temperature = compile_temperature().ffill().mean(axis='columns').to_frame('Degrees F')
     temperature = temperature.reindex(error.index).ffill()
 
-    dataset = pd.concat([error, forecast, temperature], axis='columns')
+    dataset = pd.concat([load, forecast, temperature], axis='columns')
     dataset['Day'] = dataset.index.day
     dataset['DoW'] = dataset.index.dayofweek
     dataset['Month'] = dataset.index.month
     dataset['Hour'] = dataset.index.hour
     dataset = dataset.resample('1h').ffill().dropna(axis='index')
 
-    peak_time = pd.Index(dataset.resample('1d')['Error MW'].idxmax(), name='Peak Time')
+    peak_time = pd.Index(dataset.resample('1d')['Load MW'].idxmax(), name='Peak Time')
     peak_dataset = dataset.loc[peak_time]
 
     testing = dataset[dataset.index >= '2024']
