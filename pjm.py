@@ -8,8 +8,8 @@ from extreme_tree import ExtremeForest
 def read_peak_dataset(filename):
     dataset = pd.read_csv(filename, index_col=0)
     dataset.index = pd.to_datetime(dataset.index, utc=True).tz_convert('US/Eastern')
-    feature = dataset.drop(columns='Error MW')
-    target = dataset['Error MW']
+    feature = dataset.drop(columns='Load MW')
+    target = dataset['Load MW']
     return feature, target
 
 
@@ -52,7 +52,7 @@ def main():
     test_feature, test_target = read_peak_dataset('datasets/pjm/testing.csv')
     validation_feature, validation_target = read_peak_dataset('datasets/pjm/validation.csv')
 
-    model = ExtremeForest(ensemble_size=100, resample_ratio=0.9, max_n_splits=40, min_impurity_drop_ratio=0.01)
+    model = ExtremeForest(ensemble_size=50, min_score=0.0001, min_partition_size=200)
     model.fit(train_feature, train_target)
 
     write_prediction('training_prediction.csv', model, train_feature)
