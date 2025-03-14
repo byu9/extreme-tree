@@ -7,7 +7,7 @@ from scipy.stats import norm
 from extreme_tree.equal_distributions import empirical_cdf
 from pjm import read_generation
 from pjm import read_peak_dataset
-from pjm import read_prediction_extended
+from pjm import read_prediction
 
 
 def calc_residual_mae(residuals, label):
@@ -16,7 +16,7 @@ def calc_residual_mae(residuals, label):
 
 
 def calc_residual_umae(residuals, label):
-    umae = np.nanmean(residuals[residuals < 0])
+    umae = np.nanmean(residuals.clip(upper=0))
     print(f'{label} --- {umae=:}')
 
 
@@ -55,7 +55,7 @@ def plot_histogram(sample, save_as):
     histogram_data.to_csv(save_as)
 
     plt.figure()
-    plt.stem(centers, height)
+    plt.step(centers, height)
     plt.title('Histogram')
 
 
@@ -80,9 +80,9 @@ def main():
     _, train_target = read_peak_dataset('datasets/pjm/training.csv')
     _, validation_target = read_peak_dataset('datasets/pjm/validation.csv')
 
-    test_prediction = read_prediction_extended('testing_prediction.csv')
-    train_prediction = read_prediction_extended('training_prediction.csv')
-    validation_prediction = read_prediction_extended('validation_prediction.csv')
+    test_prediction = read_prediction('testing_prediction.csv')
+    train_prediction = read_prediction('training_prediction.csv')
+    validation_prediction = read_prediction('validation_prediction.csv')
 
     generation = read_generation()
 
@@ -99,8 +99,8 @@ def main():
     calc_residual_mae(validation_residuals, label='validation')
     calc_residual_umae(validation_residuals, label='validation')
 
-    plot_histogram(validation_residuals, save_as='pjm_residual_histogram.csv')
-    plot_quantile_quantile(validation_residuals, save_as='pjm_residual_qq.csv')
+    plot_histogram(train_residuals, save_as='pjm_residual_histogram.csv')
+    plot_quantile_quantile(train_residuals, save_as='pjm_residual_qq.csv')
     plot_value_at_risk(test_prediction, generation, test_target)
     plot_prediction(test_prediction, test_target)
 
