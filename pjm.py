@@ -1,8 +1,33 @@
 #!/usr/bin/env python3
+import numpy as np
 import pandas as pd
+from scipy.special import expi
+from scipy.special import gamma
+from scipy.special import gammainc
 from scipy.stats import genextreme
 
 from extreme_tree import ExtremeForest
+
+
+def logarithmic_integral(x):
+    return expi(np.log(x))
+
+
+def lower_incomplete_gamma(s, x):
+    return gamma(s) * gammainc(s, x)
+
+
+def conditional_value_at_risk(mu, sigma, xi, alpha):
+    xi_zero = np.isclose(xi, 0)
+    one_over_xi = np.divide(1, xi, where=~xi_zero)
+    log_alpha = np.log(alpha)
+    li_alpha = logarithmic_integral(alpha)
+
+    term = one_over_xi * (lower_incomplete_gamma(1 - xi, -log_alpha) - (1 - alpha))
+    term_zero = np.euler_gamma - li_alpha + alpha * np.log(-log_alpha)
+    term = np.positive(term_zero, where=xi_zero, out=term)
+
+    return mu + sigma / (1 - alpha) * term
 
 
 def read_peak_dataset(filename):
@@ -29,15 +54,21 @@ def read_prediction(filename):
 def write_prediction(filename, model, feature):
     mu, sigma, xi = model.predict(feature)
     predict_dist = genextreme(loc=mu.ravel(), scale=sigma.ravel(), c=-xi.ravel())
+    eta = 0.1 / 365
+    alpha = 1 - eta
+
+    val_at_risk = predict_dist.isf(eta)
+    cond_val_at_risk = conditional_value_at_risk(mu.ravel(), sigma.ravel(), xi.ravel(), alpha=alpha)
 
     prediction_dict = {
         'mu': mu.ravel(),
         'sigma': sigma.ravel(),
         'xi': xi.ravel(),
-        'mean': predict_dist.mean().ravel(),
-        'lo': predict_dist.ppf(0.05).ravel(),
-        'hi': predict_dist.ppf(0.95).ravel(),
-        'VaR': predict_dist.isf(11.415e-6).ravel(),
+        'mean': predict_dist.mean(),
+        'lo': predict_dist.ppf(0.05),
+        'hi': predict_dist.ppf(0.95),
+        'VaR': val_at_risk,
+        'EUE': (cond_val_at_risk - val_at_risk) * eta
     }
     prediction = pd.DataFrame(prediction_dict, index=feature.index)
     prediction.to_csv(filename)
