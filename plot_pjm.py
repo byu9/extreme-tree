@@ -33,17 +33,34 @@ def plot_prediction(prediction, target):
     plt.legend()
 
 
-def plot_value_at_risk(prediction, generation, target):
+def plot_value_at_risk(prediction, generation, target, save_as):
     generation = generation.reindex(target.index)
-
-    plt.figure()
-    plt.step(generation.index, generation, label='generation')
-    plt.step(target.index, target, label='target')
-    plt.step(prediction.index, prediction['VaR'], label='VaR')
-    plt.legend()
 
     underforecasted = np.count_nonzero(prediction['VaR'] <= target)
     print(f'{underforecasted=:}')
+
+    report = pd.concat([
+        generation.rename('Generation'),
+        target.rename('Load'),
+        prediction['VaR'],
+    ], axis='columns')
+
+    annul_eue = prediction['EUE'].sum()
+    annual_demand = target.sum()
+    annul_eue_ppm = annul_eue / annual_demand * 1e6
+
+    print(f'{annul_eue_ppm=:}')
+    print(f'{annul_eue=:}')
+    print(f'{annual_demand=:}')
+
+    report.to_csv(save_as, index_label='Index', date_format='%Y-%m-%d %H:%M')
+    report.plot(drawstyle='steps')
+
+
+def plot_eue(prediction, save_as):
+    daily_eue = prediction[['EUE']].resample('1d').sum()
+    daily_eue.to_csv(save_as, index_label='Index', date_format='%Y-%m-%d %H:%M')
+    daily_eue.plot(drawstyle='steps')
 
 
 def plot_histogram(sample, save_as):
@@ -101,7 +118,8 @@ def main():
 
     plot_histogram(train_residuals, save_as='pjm_residual_histogram.csv')
     plot_quantile_quantile(train_residuals, save_as='pjm_residual_qq.csv')
-    plot_value_at_risk(test_prediction, generation, test_target)
+    plot_value_at_risk(test_prediction, generation, test_target, save_as='pjm_test_prediction.csv')
+    plot_eue(test_prediction, save_as='test_eue.csv')
     plot_prediction(test_prediction, test_target)
 
     plt.show()
