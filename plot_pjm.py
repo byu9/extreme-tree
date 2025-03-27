@@ -92,6 +92,18 @@ def plot_quantile_quantile(sample, save_as):
     plt.title('Quantile-Quantile')
 
 
+def calc_capacity_reduction(test_prediction, generation):
+    generation = generation.reindex(test_prediction.index).ffill()
+
+    pjm_annual_capacity = generation.sum()
+    our_annual_capacity = test_prediction['VaR'].sum()
+    capacity_reduction = (pjm_annual_capacity - our_annual_capacity) / pjm_annual_capacity
+
+    print(f'{our_annual_capacity=:.2f}')
+    print(f'{pjm_annual_capacity=:.2f}')
+    print(f'{capacity_reduction=:.2%}')
+
+
 def main():
     _, test_target = read_peak_dataset('datasets/pjm/testing.csv')
     _, train_target = read_peak_dataset('datasets/pjm/training.csv')
@@ -115,6 +127,8 @@ def main():
 
     calc_residual_mae(validation_residuals, label='validation')
     calc_residual_umae(validation_residuals, label='validation')
+
+    calc_capacity_reduction(test_prediction, generation)
 
     plot_histogram(train_residuals, save_as='pjm_residual_histogram.csv')
     plot_quantile_quantile(train_residuals, save_as='pjm_residual_qq.csv')
