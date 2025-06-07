@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import pandas as pd
 
 
@@ -128,10 +129,9 @@ def compile_datasets():
 
     load = compile_load().sum(axis='columns', skipna=False).rename('Load MW')
     forecast = compile_load_forecast()['RTO'].rename('Forecast MW')
-    error = (load - forecast).to_frame(name='Error MW')
 
     temperature = compile_temperature().ffill().mean(axis='columns').to_frame('Degrees F')
-    temperature = temperature.reindex(error.index).ffill()
+    temperature = temperature.reindex(load.index).ffill()
 
     dataset = pd.concat([load, forecast, temperature], axis='columns')
     dataset['Day'] = dataset.index.day
@@ -140,16 +140,22 @@ def compile_datasets():
     dataset['Hour'] = dataset.index.hour
     dataset = dataset.resample('1h').ffill().dropna(axis='index')
 
+    testing_start_date = '2024'
+
+    whole_training = dataset[dataset.index < testing_start_date]
+    whole_testing = dataset[dataset.index >= testing_start_date]
+
+    whole_training.to_csv('whole_training.csv', float_format=float_format)
+    whole_testing.to_csv('whole_testing.csv', float_format=float_format)
+
     peak_time = pd.Index(dataset.resample('1d')['Load MW'].idxmax(), name='Peak Time')
     peak_dataset = dataset.loc[peak_time]
 
-    testing = dataset[dataset.index >= '2024']
-    peak_training = peak_dataset[peak_dataset.index < '2024']
-    peak_testing = peak_dataset[peak_dataset.index >= '2024']
+    peak_training = peak_dataset[peak_dataset.index < testing_start_date]
+    peak_testing = peak_dataset[peak_dataset.index >= testing_start_date]
 
-    testing.to_csv('testing.csv', float_format=float_format)
-    peak_training.to_csv('training.csv', float_format=float_format)
-    peak_testing.to_csv('validation.csv', float_format=float_format)
+    peak_training.to_csv('peak_training.csv', float_format=float_format)
+    peak_testing.to_csv('peak_testing.csv', float_format=float_format)
 
     generation = compile_generation()
     generation.to_csv('generation.csv', float_format=float_format)
