@@ -24,7 +24,8 @@ def fit_predict_model(feature, target):
 def main():
     feature, target = read_dataset()
     prediction = fit_predict_model(feature, target)
-    prediction.to_csv('021-run_competitor1_on_synthetic.csv', index_label='index')
+    prediction.to_csv('091-run_competitor1_on_synthetic_quantiles.csv', index_label='index')
 
 
-main()
+if __name__ == '__main__':
+    main()
