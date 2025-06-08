@@ -3,7 +3,7 @@ library(gamlss)
 library(gamlssx)
 observations <- read.csv('datasets/synthetic/observations.csv')
 
-fit <- fitGEV(y ~ pb(x), sigma.fo = ~ pb(x), nu.fo = ~ pb(x), data=observations)
+fit <- fitGEV(y ~ cs(x), sigma.fo = ~ cs(x), nu.fo = ~ cs(x), data=observations)
 mu = fitted(fit, what='mu')
 sigma = fitted(fit, what='sigma')
 xi = fitted(fit, what='nu')
