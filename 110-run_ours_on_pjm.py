@@ -30,7 +30,7 @@ def conditional_value_at_risk(mu, sigma, xi, alpha):
     return mu + sigma / (1 - alpha) * term
 
 
-def read_peak_dataset(filename):
+def read_dataset(filename):
     dataset = pd.read_csv(filename, index_col=0)
     dataset.index = pd.to_datetime(dataset.index, utc=True).tz_convert('US/Eastern')
     feature = dataset.drop(columns='Load MW')
@@ -61,8 +61,8 @@ def write_prediction(filename, model, feature):
 
 
 def main():
-    train_feature, train_target = read_peak_dataset('datasets/pjm/peak_training.csv')
-    test_feature, test_target = read_peak_dataset('datasets/pjm/peak_testing.csv')
+    train_feature, train_target = read_dataset('datasets/pjm/peak_training.csv')
+    test_feature, test_target = read_dataset('datasets/pjm/whole_testing.csv')
 
     model = ExtremeForest(ensemble_size=50, min_score=0.05, min_partition_size=30)
     model.fit(train_feature, train_target)
