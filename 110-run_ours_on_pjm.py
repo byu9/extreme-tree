@@ -63,12 +63,14 @@ def write_prediction(filename, model, feature):
 def main():
     train_feature, train_target = read_dataset('datasets/pjm/peak_training.csv')
     test_feature, test_target = read_dataset('datasets/pjm/whole_testing.csv')
+    peak_test_feature, peak_test_target = read_dataset('datasets/pjm/peak_testing.csv')
 
     model = ExtremeForest(ensemble_size=50, min_score=0.05, min_partition_size=30)
     model.fit(train_feature, train_target)
 
     write_prediction('190-run_ours_on_pjm_training.csv', model, train_feature)
     write_prediction('190-run_ours_on_pjm_testing.csv', model, test_feature)
+    write_prediction('190-run_ours_on_pjm_testing_peaks.csv', model, peak_test_feature)
 
 
 if __name__ == '__main__':
