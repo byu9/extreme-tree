@@ -21,14 +21,14 @@ def write_prediction(filename, model, feature):
 
 
 def main():
-    train_feature, train_target = read_dataset('datasets/pjm/training.csv')
-    test_feature, test_target = read_dataset('datasets/pjm/testing.csv')
+    train_feature, train_target = read_dataset('datasets/pjm/whole_training.csv')
+    test_feature, test_target = read_dataset('datasets/pjm/whole_testing.csv')
 
     model = RandomForestQuantileRegressor(default_quantiles=1 - 0.1 / 365)
     model.fit(train_feature, train_target)
 
-    write_prediction('competitor1-training.csv', model, train_feature)
-    write_prediction('competitor1-testing.csv', model, test_feature)
+    write_prediction('191-run_competitor1_on_pjm_training.csv', model, train_feature)
+    write_prediction('191-run_competitor1_on_pjm_testing.csv', model, test_feature)
 
 
 if __name__ == '__main__':
