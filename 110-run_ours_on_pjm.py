@@ -68,7 +68,7 @@ def main():
     model.fit(train_feature, train_target)
 
     write_prediction('190-run_ours_on_pjm_training.csv', model, train_feature)
-    write_prediction('190-run_ours_on_pjm_testing.csv', model, train_feature)
+    write_prediction('190-run_ours_on_pjm_testing.csv', model, test_feature)
 
 
 if __name__ == '__main__':
