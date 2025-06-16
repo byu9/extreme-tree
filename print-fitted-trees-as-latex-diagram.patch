@@ -1,0 +1,58 @@
+diff --git a/extreme_tree/extreme_tree.py b/extreme_tree/extreme_tree.py
+index c68a65d..58940ca 100644
+--- a/extreme_tree/extreme_tree.py
++++ b/extreme_tree/extreme_tree.py
+@@ -115,8 +115,51 @@ class ExtremeTree:
+             self._tree.add_node(left, parent=leaf, is_left=True)
+             self._tree.add_node(right, parent=leaf, is_left=False)
+ 
+-        for leaf in self._tree.leaves:
+-            leaf.prediction = self._distribution.estimate(leaf.target)
++        for node in self._tree.nodes:
++            node.prediction = self._distribution.estimate(node.target)
++
++        for node in self._tree.topological_ordering():
++            parent = self._tree.parent_of(node)
++
++            if parent is None:
++                placement = ''
++
++            elif node is self._tree.left_child_of(parent):
++                placement = f'below left=3em and -2em of 0x{id(parent):08X}'
++
++            else:
++                placement = f'below right=3em and -2em of 0x{id(parent):08X}'
++
++            if node in self._tree.non_leaves:
++                m_str = f'$m={node.feature_id + 1}$\\\\\n  $T={node.score:.4f}$\\\\\n'
++            else:
++                m_str = ''
++
++            print(
++                f'\\node (0x{id(node):08X}) [\n'
++                '    tree-node,\n'
++                f'    label=above:{{\\texttt{{Node 0x{id(node):08X}}}}},\n'
++                f'    {placement}'
++                '] {\n'
++                f'  {m_str}'
++                f'  $\\hat{{\\mu}}={node.prediction[0].squeeze():.4f}$\\\\\n'
++                f'  $\\hat{{\\sigma}}={node.prediction[1].squeeze():.4f}$\\\\\n'
++                f'  $\\hat{{\\xi}}={node.prediction[2].squeeze():.4f}$'
++                '};'
++            )
++
++            if parent is not None:
++                if node is self._tree.left_child_of(parent):
++                    threshold_str = f'node [midway, left]{{$x_{{1,n}} \\leq {parent.threshold:.4f}$}};'
++
++                else:
++                    threshold_str = f'node [midway, right]{{$x_{{1,n}} > {parent.threshold:.4f}$}};'
++
++                print(
++                    f'\\draw[->, thick] (0x{id(self._tree.parent_of(node)):08X}) -- (0x{id(node):08X}) '
++                    f'{threshold_str}'
++                )
++        raise Exception(f'Dumping tree as LaTeX tikz diagram complete.')
+ 
+     def _forward_prop(self, feature):
+         n_features, n_samples = feature.shape
