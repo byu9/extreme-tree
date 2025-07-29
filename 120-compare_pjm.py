@@ -32,7 +32,8 @@ def main():
     plt.plot(target, label='Demand HIA')
     plt.plot(ours, label='Ours')
     plt.plot(competitor1, label='Competitor1')
-
+    plt.legend()
+    plt.grid()
 
     plt.show()
 
