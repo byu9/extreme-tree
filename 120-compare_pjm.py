@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import pandas as pd
-import pandas as pd
 from matplotlib import pyplot as plt
 
 
@@ -17,6 +16,7 @@ def read_our_prediction():
     prediction = dataset['VaR']
     return prediction
 
+
 def read_competitor1_prediction():
     dataset = pd.read_csv('191-run_competitor1_on_pjm_testing.csv', index_col=0)
     dataset.index = pd.to_datetime(dataset.index, utc=True).tz_convert('US/Eastern')
@@ -24,14 +24,24 @@ def read_competitor1_prediction():
     return prediction
 
 
+def read_generation():
+    dataset = pd.read_csv('datasets/pjm/generation.csv', index_col=0)
+    dataset.index = pd.to_datetime(dataset.index, utc=True).tz_convert('US/Eastern')
+    target = dataset['MW']
+    return target
+
+
 def main():
     target = read_testing()
     ours = read_our_prediction()
     competitor1 = read_competitor1_prediction()
+    pjm = read_generation()
+    pjm = pjm.reindex(target.index)
 
     plt.plot(target, label='Demand HIA')
     plt.plot(ours, label='Ours')
     plt.plot(competitor1, label='Competitor1')
+    plt.plot(pjm, label='PJM')
     plt.legend()
     plt.grid()
 
