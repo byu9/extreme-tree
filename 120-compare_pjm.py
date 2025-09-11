@@ -31,20 +31,61 @@ def read_generation():
     return target
 
 
-def main():
+def plot_comparison():
     target = read_testing()
     ours = read_our_prediction()
     competitor1 = read_competitor1_prediction()
     pjm = read_generation()
-    pjm = pjm.reindex(target.index)
 
+    plt.figure()
     plt.plot(target, label='Demand HIA')
     plt.plot(ours, label='Ours')
     plt.plot(competitor1, label='Competitor1')
     plt.plot(pjm, label='PJM')
+    plt.title('Committed Capacity')
     plt.legend()
     plt.grid()
 
+
+def plot_comparison_cumulative():
+    target = read_testing().cumsum()
+    ours = read_our_prediction().cumsum()
+    competitor1 = read_competitor1_prediction().cumsum()
+    pjm = read_generation().cumsum()
+
+    plt.figure()
+    plt.plot(target, label='Demand HIA')
+    plt.plot(ours, label='Ours')
+    plt.plot(competitor1, label='Competitor1')
+    plt.plot(pjm, label='PJM')
+    plt.title('Cumulative Committed Capacity')
+    plt.legend()
+    plt.grid()
+
+
+def plot_under_commitment():
+    target = read_testing()
+    ours = read_our_prediction() - target
+    competitor1 = read_competitor1_prediction() - target
+    pjm = read_generation() - target
+
+    ours = ours.clip(upper=0).cumsum()
+    competitor1 = competitor1.clip(upper=0).cumsum()
+    pjm = pjm.clip(upper=0).cumsum()
+
+    plt.figure()
+    plt.plot(ours, label='Ours')
+    plt.plot(competitor1, label='Competitor1')
+    plt.plot(pjm, label='PJM')
+    plt.title('Cumulative Undercommitted Capacity')
+    plt.legend()
+    plt.grid()
+
+
+def main():
+    plot_comparison()
+    plot_comparison_cumulative()
+    plot_under_commitment()
     plt.show()
 
     pass
