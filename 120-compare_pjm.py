@@ -3,6 +3,12 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 
+def write_csv_local_time(dataset, filename):
+    dataset = dataset.copy()
+    dataset.index = dataset.index.tz_convert('US/Eastern').tz_localize(None)
+    dataset.to_csv(filename)
+
+
 def read_testing():
     dataset = pd.read_csv('datasets/pjm/whole_testing.csv', index_col=0)
     dataset.index = pd.to_datetime(dataset.index, utc=True).tz_convert('US/Eastern')
@@ -37,14 +43,14 @@ def plot_comparison():
     competitor1 = read_competitor1_prediction()
     pjm = read_generation()
 
-    plt.figure()
-    plt.plot(target, label='Demand HIA')
-    plt.plot(ours, label='Ours')
-    plt.plot(competitor1, label='Competitor1')
-    plt.plot(pjm, label='PJM')
-    plt.title('Committed Capacity')
-    plt.legend()
-    plt.grid()
+    comparison = pd.DataFrame({
+        'Ours': ours,
+        'Competitor1': competitor1,
+        'PJM': pjm,
+        'Demand': target
+    })
+    comparison.plot(title='Committed Capacity', grid=True)
+    write_csv_local_time(comparison, '194-committed-capacity.csv')
 
 
 def plot_comparison_cumulative():
@@ -53,14 +59,15 @@ def plot_comparison_cumulative():
     competitor1 = read_competitor1_prediction().cumsum()
     pjm = read_generation().cumsum()
 
-    plt.figure()
-    plt.plot(target, label='Demand HIA')
-    plt.plot(ours, label='Ours')
-    plt.plot(competitor1, label='Competitor1')
-    plt.plot(pjm, label='PJM')
-    plt.title('Cumulative Committed Capacity')
-    plt.legend()
-    plt.grid()
+    comparison = pd.DataFrame({
+        'Ours': ours,
+        'Competitor1': competitor1,
+        'PJM': pjm,
+        'Demand': target
+    })
+
+    comparison.plot(title='Cumulative Committed Capacity', grid=True)
+    write_csv_local_time(comparison, '195-cumulative-committed.csv')
 
 
 def plot_under_commitment():
@@ -73,13 +80,14 @@ def plot_under_commitment():
     competitor1 = competitor1.clip(upper=0).cumsum()
     pjm = pjm.clip(upper=0).cumsum()
 
-    plt.figure()
-    plt.plot(ours, label='Ours')
-    plt.plot(competitor1, label='Competitor1')
-    plt.plot(pjm, label='PJM')
-    plt.title('Cumulative Undercommitted Capacity')
-    plt.legend()
-    plt.grid()
+    comparison = pd.DataFrame({
+        'Ours': ours,
+        'Competitor1': competitor1,
+        'PJM': pjm,
+    })
+
+    comparison.plot(title='Cumulative Under-Committed Capacity', grid=True)
+    write_csv_local_time(comparison, '196-cumulative_under_committed.csv')
 
 
 def main():
