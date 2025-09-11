@@ -158,6 +158,7 @@ def compile_datasets():
     peak_testing.to_csv('peak_testing.csv', float_format=float_format)
 
     generation = compile_generation()
+    generation = generation[generation.index >= testing_start_date]
     generation.to_csv('generation.csv', float_format=float_format)
 
 
