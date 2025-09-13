@@ -27,7 +27,7 @@ parameter_estimates <- data.frame(index=test$Time,
 
 write.csv(
     parameter_estimates,
-    file='192-run_competitor2_on_pjm.csv',
+    file='192-run_competitor2_on_pjm_testing.csv',
     quote=FALSE,
     row.names=FALSE
 )
