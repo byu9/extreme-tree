@@ -1,8 +1,7 @@
 # Nonstationary GEV estimator
 
-This is the companion repository for the paper _Prediction of the Conditional Probability Densities of
-Time Interval Extrema with Application to Risk-Sensitive Scheduling_.
-https://doi.org/10.48550/arXiv.2506.01358
+This is the companion repository for the paper _Ensemble-based peak demand probability density forecasting with application to risk-aware power system scheduling_.
+https://doi.org/10.1016/j.ijepes.2025.111452
 
 This repository contains the source code, source datasets, dataset compilation routines, fitting programs, and
 visualization scripts. Most programs are in Python but some scripts are written in R and requires the R interpreter.
