@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "The citation has been provided for convenience."
+authors:
+  - family-names: "Yu"
+    given-names: "Buyi"
+  - family-names: "Tang"
+    given-names: "Wenyuan"
+title: "ExtremeTrees: Ensemble-based peak demand probability density forecasting"
+version: 0.0.1
+doi: 10.1016/j.ijepes.2025.111452
+date-released: 2025-01-01
+preferred-citation:
+  type: article
+  authors:
+    - family-names: "Yu"
+      given-names: "Buyi"
+    - family-names: "Tang"
+      given-names: "Wenyuan"
+  doi: "10.1016/j.ijepes.2025.111452"
+  journal: "International Journal of Electrical Power & Energy Systems"
+  title: "Ensemble-based peak demand probability density forecasting with application to risk-aware power system scheduling"
+  volume: 173
+  year: 2025
+  start: 111452
