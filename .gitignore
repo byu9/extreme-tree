@@ -1,4 +1,19 @@
-.venv/
+# Python Bytecode and Cache
 __pycache__/
+
+# Virtual Environments
+.venv/
+
+# Build and Distribution folders
+dist/
+build/
+*.egg-info/
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+
+# macOS system files
+.DS_Store
+
+# Pycharm files
 .idea/
-*.csv
