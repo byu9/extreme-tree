@@ -1,0 +1,20 @@
+[project]
+name = "extreme-tree"
+version = "0.0.1"
+description = "Estimate nonstationary GEV using tree-based bagging ensemble"
+maintainers = [
+    { name = "Buyi Yu", email = "byu9@ncsu.edu" },
+    { name = "Buyi Yu", email = "john.buyi.yu@icloud.com" },
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    'numpy',
+    'scipy',
+    'tqdm',
+]
+
+[project.urls]
+"Homepage" = "https://github.com/byu9/extreme-tree"
+"Research Paper" = "https://doi.org/10.1016/j.ijepes.2025.111452"
+"Bug Tracker" = "https://github.com/byu9/extreme-tree/issues"
