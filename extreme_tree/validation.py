@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 
 
 def ensure_size_at_least(sample, min_size=2):
@@ -8,12 +7,12 @@ def ensure_size_at_least(sample, min_size=2):
 
 
 def validate_feature(feature):
-    if isinstance(feature, pd.DataFrame):
-        feature = feature.to_numpy()
+    # Cast pandas dataframe to numpy without introducing pandas dependency
+    func_to_numpy = getattr(feature, 'to_numpy', None)
+    if callable(func_to_numpy):
+        feature = func_to_numpy()
 
-    else:
-        feature = np.atleast_2d(feature)
-
+    feature = np.atleast_2d(feature)
     if not feature.ndim == 2:
         raise ValueError('Feature must be 2D having (n_samples, n_features).')
 
@@ -21,11 +20,12 @@ def validate_feature(feature):
 
 
 def validate_target(target):
-    if isinstance(target, pd.DataFrame):
-        target = target.to_numpy()
+    # Cast pandas dataframe to numpy without introducing pandas dependency
+    func_to_numpy = getattr(target, 'to_numpy', None)
+    if callable(func_to_numpy):
+        target = func_to_numpy()
 
-    else:
-        target = np.ravel(target)
+    target = np.ravel(target)
 
     return target
 
