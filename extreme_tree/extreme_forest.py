@@ -1,5 +1,5 @@
 import numpy as np
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from .extreme_tree import ExtremeTree
 from .validation import validate_feature
