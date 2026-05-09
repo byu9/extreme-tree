@@ -80,7 +80,7 @@ class ExtremeTree:
         '_tree',
     )
 
-    def __init__(self, distribution=GenExtreme(), max_n_splits=40, min_partition_size=50,
+    def __init__(self, distribution=GenExtreme(), max_n_splits=40, min_partition_size=10,
                  min_score=0.01):
         self._max_n_splits = max_n_splits
         self._distribution = distribution
