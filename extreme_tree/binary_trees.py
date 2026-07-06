@@ -3,13 +3,13 @@ from collections import deque
 
 class BinaryTree:
     __slots__ = (
-        '_root',
-        '_nodes',
-        '_leaves',
-        '_non_leaves',
-        '_parents',
-        '_left_children',
-        '_right_children',
+        "_root",
+        "_nodes",
+        "_leaves",
+        "_non_leaves",
+        "_parents",
+        "_left_children",
+        "_right_children",
     )
 
     def __init__(self):
@@ -24,17 +24,17 @@ class BinaryTree:
     def add_node(self, node, parent=None, is_left=True):
 
         if node in self._nodes:
-            raise ValueError(f'{self} contains {node}.')
+            raise ValueError(f"{self} contains {node}.")
 
         if parent is None:
             if self._root is not None:
-                raise ValueError(f'Root exists.')
+                raise ValueError(f"Root exists.")
 
             self._root = node
 
         else:
             if parent not in self._nodes:
-                raise ValueError(f'Parent {parent} is not in {self}.')
+                raise ValueError(f"Parent {parent} is not in {self}.")
 
             if parent in self._leaves:
                 self._leaves.remove(parent)
@@ -42,13 +42,13 @@ class BinaryTree:
 
             if is_left:
                 if self._left_children[parent] is not None:
-                    raise ValueError(f'Left child of parent {parent} exists.')
+                    raise ValueError(f"Left child of parent {parent} exists.")
 
                 self._left_children[parent] = node
 
             else:
                 if self._right_children[parent] is not None:
-                    raise ValueError(f'Right child of parent {parent} exists.')
+                    raise ValueError(f"Right child of parent {parent} exists.")
 
                 self._right_children[parent] = node
 
@@ -82,25 +82,25 @@ class BinaryTree:
 
     def parent_of(self, node):
         if node not in self:
-            raise LookupError(f'{node} is not in {self}.')
+            raise LookupError(f"{node} is not in {self}.")
 
         return self._parents[node]
 
     def left_child_of(self, node):
         if node not in self:
-            raise LookupError(f'{node} is not in {self}.')
+            raise LookupError(f"{node} is not in {self}.")
 
         return self._left_children[node]
 
     def right_child_of(self, node):
         if node not in self:
-            raise LookupError(f'{node} is not in {self}.')
+            raise LookupError(f"{node} is not in {self}.")
 
         return self._right_children[node]
 
     def ancestors_of(self, node):
         if node not in self:
-            raise LookupError(f'{node} is not in {self}.')
+            raise LookupError(f"{node} is not in {self}.")
 
         ancestor = self.parent_of(node)
 
@@ -113,7 +113,7 @@ class BinaryTree:
         Returns descendants in level-order traversal: root, left, right, ...
         """
         if node not in self:
-            raise LookupError(f'{node} is not in {self}.')
+            raise LookupError(f"{node} is not in {self}.")
 
         descendants = deque()
         descendants.append(self.left_child_of(node))
