@@ -11,15 +11,13 @@ from .validation import validate_feature_target
 
 class _TreeNode:
     __slots__ = (
-        'feature',
-        'target',
-
-        'feature_id',
-        'threshold',
-        'score',
-
-        'prediction',
-        'pi',
+        "feature",
+        "target",
+        "feature_id",
+        "threshold",
+        "score",
+        "prediction",
+        "pi",
     )
 
     def __init__(self, feature, target):
@@ -36,7 +34,7 @@ class _TreeNode:
     def _splitting_rules(self, min_partition_size, score_func):
         n_features, n_samples = self.feature.shape
 
-        for feature_id in tqdm(range(n_features), desc='Feature', leave=False):
+        for feature_id in tqdm(range(n_features), desc="Feature", leave=False):
             sort_indices = self.feature[feature_id].argsort()
             feature_vals = self.feature[feature_id, sort_indices]
             target_vals = self.target[sort_indices]
@@ -44,8 +42,8 @@ class _TreeNode:
             unique_values = np.unique(feature_vals)
             midpoints = (unique_values[:-1] + unique_values[1:]) / 2
 
-            for threshold in tqdm(midpoints, desc='Threshold', leave=False):
-                split_index = np.searchsorted(feature_vals, threshold, side='right')
+            for threshold in tqdm(midpoints, desc="Threshold", leave=False):
+                split_index = np.searchsorted(feature_vals, threshold, side="right")
 
                 if min_partition_size <= split_index <= n_samples - min_partition_size:
                     left_target_vals = target_vals[:split_index]
@@ -74,26 +72,27 @@ class _TreeNode:
 
 class ExtremeTree:
     __slots__ = (
-        '_max_n_splits',
-        '_distribution',
-        '_find_rule_params',
-        '_tree',
+        "_max_n_splits",
+        "_distribution",
+        "_find_rule_params",
+        "_tree",
     )
 
-    def __init__(self, distribution=GenExtreme(), max_n_splits=40, min_partition_size=50,
-                 min_score=0.01):
+    def __init__(
+        self, distribution=GenExtreme(), max_n_splits=40, min_partition_size=50, min_score=0.01
+    ):
         self._max_n_splits = max_n_splits
         self._distribution = distribution
         self._tree = None
         self._find_rule_params = {
-            'min_partition_size': min_partition_size,
-            'score_func': distribution.score_func,
-            'min_score': min_score
+            "min_partition_size": min_partition_size,
+            "score_func": distribution.score_func,
+            "min_score": min_score,
         }
 
     def _ensure_fitted(self):
         if self._tree is None:
-            raise RuntimeError('Model is not fitted.')
+            raise RuntimeError("Model is not fitted.")
 
     def _build_tree(self, feature, target):
         root_node = _TreeNode(feature, target)
@@ -101,13 +100,13 @@ class ExtremeTree:
         self._tree = BinaryTree()
         self._tree.add_node(root_node)
 
-        for _ in tqdm(range(self._max_n_splits), desc='Split', leave=False):
+        for _ in tqdm(range(self._max_n_splits), desc="Split", leave=False):
 
             candidate_leaves = [leaf for leaf in self._tree.leaves if leaf.score is not None]
             if not candidate_leaves:
                 break
 
-            leaf = max(candidate_leaves, key=attrgetter('score'))
+            leaf = max(candidate_leaves, key=attrgetter("score"))
             left, right = leaf.split()
             left.find_optimal_rule(**self._find_rule_params)
             right.find_optimal_rule(**self._find_rule_params)

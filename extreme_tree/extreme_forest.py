@@ -8,16 +8,13 @@ from .validation import validate_feature_target
 
 class ExtremeForest:
     __slots__ = (
-        '_ensemble',
-        '_resample_ratio',
-        '_random_gen'
+        "_ensemble",
+        "_resample_ratio",
+        "_random_gen",
     )
 
     def __init__(self, ensemble_size=10, resample_ratio=1, **weak_args):
-        self._ensemble = [
-            ExtremeTree(**weak_args)
-            for _ in range(ensemble_size)
-        ]
+        self._ensemble = [ExtremeTree(**weak_args) for _ in range(ensemble_size)]
         self._resample_ratio = resample_ratio
         self._random_gen = np.random.default_rng()
 
@@ -26,7 +23,7 @@ class ExtremeForest:
         sample_indices = np.arange(len(target))
         resample_size = int(self._resample_ratio * len(target))
 
-        for weak_learner in tqdm(self._ensemble, desc='Ensemble', leave=False):
+        for weak_learner in tqdm(self._ensemble, desc="Ensemble", leave=False):
             selected_indices = self._random_gen.choice(sample_indices, size=resample_size)
             selected_feature = feature[selected_indices]
             selected_target = target[selected_indices]
