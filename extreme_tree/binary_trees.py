@@ -1,6 +1,10 @@
 from collections import deque
 
 
+class BinaryTreeNode:
+    __slots__ = ()
+
+
 class BinaryTree:
     __slots__ = (
         "_root",
@@ -13,15 +17,20 @@ class BinaryTree:
     )
 
     def __init__(self):
-        self._root = None
-        self._nodes = list()
-        self._leaves = list()
-        self._non_leaves = list()
-        self._parents = dict()
-        self._left_children = dict()
-        self._right_children = dict()
+        self._root: BinaryTreeNode | None = None
+        self._nodes: list[BinaryTreeNode] = list()
+        self._leaves: list[BinaryTreeNode] = list()
+        self._non_leaves: list[BinaryTreeNode] = list()
+        self._parents: dict[BinaryTreeNode, BinaryTreeNode | None] = dict()
+        self._left_children: dict[BinaryTreeNode, BinaryTreeNode | None] = dict()
+        self._right_children: dict[BinaryTreeNode, BinaryTreeNode | None] = dict()
 
-    def add_node(self, node, parent=None, is_left=True):
+    def add_node(
+        self,
+        node: BinaryTreeNode,
+        parent: BinaryTreeNode | None = None,
+        is_left: bool = True,
+    ):
 
         if node in self._nodes:
             raise ValueError(f"{self} contains {node}.")
@@ -80,40 +89,35 @@ class BinaryTree:
     def __len__(self):
         return len(self.nodes)
 
-    def parent_of(self, node):
+    def _must_contain(self, node: BinaryTreeNode):
         if node not in self:
             raise LookupError(f"{node} is not in {self}.")
 
+    def parent_of(self, node: BinaryTreeNode):
+        self._must_contain(node)
         return self._parents[node]
 
-    def left_child_of(self, node):
-        if node not in self:
-            raise LookupError(f"{node} is not in {self}.")
-
+    def left_child_of(self, node: BinaryTreeNode):
+        self._must_contain(node)
         return self._left_children[node]
 
-    def right_child_of(self, node):
-        if node not in self:
-            raise LookupError(f"{node} is not in {self}.")
-
+    def right_child_of(self, node: BinaryTreeNode):
+        self._must_contain(node)
         return self._right_children[node]
 
-    def ancestors_of(self, node):
-        if node not in self:
-            raise LookupError(f"{node} is not in {self}.")
-
+    def ancestors_of(self, node: BinaryTreeNode):
+        self._must_contain(node)
         ancestor = self.parent_of(node)
 
         while ancestor is not None:
             yield ancestor
             ancestor = self.parent_of(ancestor)
 
-    def descendants_of(self, node):
+    def descendants_of(self, node: BinaryTreeNode):
         """
         Returns descendants in level-order traversal: root, left, right, ...
         """
-        if node not in self:
-            raise LookupError(f"{node} is not in {self}.")
+        self._must_contain(node)
 
         descendants = deque()
         descendants.append(self.left_child_of(node))
@@ -131,7 +135,3 @@ class BinaryTree:
         if self.root is not None:
             yield self.root
             yield from self.descendants_of(self.root)
-
-
-class BinaryTreeNode:
-    __slots__ = ()
