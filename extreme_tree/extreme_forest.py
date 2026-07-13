@@ -33,7 +33,7 @@ class ExtremeForest:
         feature = validate_feature(feature)
 
         weak_predictions = list()
-        for weak_learner in self._ensemble:
+        for weak_learner in tqdm(self._ensemble, desc="Ensemble"):
             weak_predictions.append(weak_learner.predict(feature))
 
         weak_predictions = np.stack(weak_predictions, axis=-1)

@@ -2,7 +2,6 @@ from copy import deepcopy
 from operator import attrgetter
 
 import numpy as np
-from tqdm.auto import tqdm
 
 from .binary_trees import BinaryTree
 from .binary_trees import BinaryTreeNode
@@ -36,7 +35,7 @@ class _TreeNode(BinaryTreeNode):
     def _splitting_rules(self, min_partition_size, score_func):
         n_features, n_samples = self.feature.shape
 
-        for feature_id in tqdm(range(n_features), desc="Feature", leave=False):
+        for feature_id in range(n_features):
             sort_indices = self.feature[feature_id].argsort()
             feature_vals = self.feature[feature_id, sort_indices]
             target_vals = self.target[sort_indices]
@@ -44,7 +43,7 @@ class _TreeNode(BinaryTreeNode):
             unique_values = np.unique(feature_vals)
             midpoints = (unique_values[:-1] + unique_values[1:]) / 2
 
-            for threshold in tqdm(midpoints, desc="Threshold", leave=False):
+            for threshold in midpoints:
                 split_index = np.searchsorted(feature_vals, threshold, side="right")
 
                 if min_partition_size <= split_index <= n_samples - min_partition_size:
@@ -102,7 +101,7 @@ class ExtremeTree:
         self._tree = BinaryTree()
         self._tree.add_node(root_node)
 
-        for _ in tqdm(range(self._max_n_splits), desc="Split", leave=False):
+        for _ in range(self._max_n_splits):
 
             candidate_leaves = [leaf for leaf in self._tree.leaves if leaf.score is not None]
             if not candidate_leaves:
