@@ -1,6 +1,6 @@
 [project]
 name = "extreme-tree"
-version = "0.0.1"
+version = "0.1.0"
 description = "Estimate nonstationary GEV using tree-based bagging ensemble"
 maintainers = [
     { name = "Buyi Yu", email = "byu9@ncsu.edu" },
