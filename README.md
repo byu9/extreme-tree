@@ -15,4 +15,4 @@ pip install extreme-tree
 
 ## How to Run
 
-For an example, see [`examples/example.ipynb`]()
+For an example, see [`examples/example.ipynb`](examples/example.ipynb)
