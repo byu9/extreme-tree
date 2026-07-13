@@ -37,7 +37,7 @@ class ExtremeForest:
             weak_predictions.append(weak_learner.predict(feature))
 
         weak_predictions = np.stack(weak_predictions, axis=-1)
-        return np.mean(weak_predictions, axis=-1)
+        return weak_predictions
 
     @property
     def trees(self):
