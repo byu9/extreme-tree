@@ -38,3 +38,8 @@ class ExtremeForest:
 
         weak_predictions = np.stack(weak_predictions, axis=-1)
         return np.mean(weak_predictions, axis=-1)
+
+    @property
+    def trees(self):
+        for weak_learner in self._ensemble:
+            yield weak_learner.tree()

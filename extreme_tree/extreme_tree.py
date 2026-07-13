@@ -1,15 +1,17 @@
+from copy import deepcopy
 from operator import attrgetter
 
 import numpy as np
 from tqdm.auto import tqdm
 
 from .binary_trees import BinaryTree
+from .binary_trees import BinaryTreeNode
 from .genextreme import GenExtreme
 from .validation import validate_feature
 from .validation import validate_feature_target
 
 
-class _TreeNode:
+class _TreeNode(BinaryTreeNode):
     __slots__ = (
         "feature",
         "target",
@@ -148,3 +150,10 @@ class ExtremeTree:
         feature = feature.transpose()
         predict = self._forward_prop(feature)
         return predict
+
+    @property
+    def tree(self):
+        self._ensure_fitted()
+
+        # Prevents external modification
+        return deepcopy(self._tree)
